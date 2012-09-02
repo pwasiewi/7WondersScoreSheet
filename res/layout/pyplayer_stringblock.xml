@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+			android:padding="10dp"
+android:orientation="vertical">
+    
+    
+	<RelativeLayout 
+	android:layout_width="fill_parent"
+	android:layout_height="46dp"
+	android:orientation="horizontal">
+		<TextView
+		    android:layout_centerVertical="true"
+		    android:layout_alignParentLeft="true"
+	        android:id="@+id/playerName"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+		    android:text="PLACEHOLDER PLAYER">    
+		</TextView>
+		
+		<TextView
+		    android:layout_centerVertical="true"
+		    android:layout_alignParentRight="true"
+	        android:id="@+id/totalScore"
+			android:layout_width="wrap_content"
+			android:layout_height="46dp"
+			android:gravity="center"
+			android:paddingRight="20dp"
+			android:visibility="invisible"
+		    android:text="56">    
+		</TextView>
+		
+		<Button
+		    android:layout_centerVertical="true"
+		    android:layout_alignParentRight="true"
+	        android:id="@+id/removePlayer"
+			android:layout_width="46dp"
+			android:layout_height="46dp"
+			android:visibility="visible"
+		    android:text="-">    
+		</Button>
+	</RelativeLayout>
+	
+	<RelativeLayout 
+	android:id="@+id/numberBar"
+			android:visibility="visible"
+	android:layout_width="fill_parent"
+	android:layout_height="46dp"
+	android:orientation="horizontal">
+		<Button
+		    android:layout_toLeftOf="@+id/stepScore"
+		    android:layout_centerVertical="true"
+	        android:id="@+id/neg"
+			android:layout_width="46dp"
+			android:layout_height="46dp"
+		    android:text="-">    
+		</Button>
+		<EditText
+		    android:layout_toLeftOf="@+id/pos"
+		    android:inputType="number"
+		    android:layout_centerVertical="true"
+	        android:id="@+id/stepScore"
+			android:layout_width="46dp"
+			android:layout_height="wrap_content"
+		    android:gravity="center"
+		    android:text="24">    
+		    
+		</EditText>
+		
+		<Button
+		    android:layout_alignParentRight="true"
+		    android:layout_centerVertical="true"
+	        android:id="@+id/pos"
+			android:layout_width="46dp"
+			android:layout_height="46dp"
+		    android:text="+">    
+		</Button>
+	</RelativeLayout>
+	
+</LinearLayout>

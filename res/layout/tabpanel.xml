@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <ListView    
+        android:descendantFocusability="afterDescendants"
+	android:id="@+id/pagerContent"
+    android:layout_alignParentTop="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    </ListView>     
+    
+<!-- 	<Button -->
+<!-- 		android:layout_alignParentBottom="true" -->
+<!-- 		android:layout_width="match_parent" -->
+<!-- 		android:layout_height="52dp"  -->
+<!-- 		android:text="Add Player"> -->
+<!-- 	</Button> -->
+    
+
+</RelativeLayout>
