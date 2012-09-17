@@ -1110,20 +1110,21 @@ containing a value of this type.
         public static final int swss=0x7f020063;
         public static final int triangle_civilian=0x7f020064;
         public static final int triangle_commercial=0x7f020065;
-        public static final int triangle_guilds=0x7f020066;
-        public static final int triangle_leader=0x7f020067;
-        public static final int triangle_military=0x7f020068;
-        public static final int triangle_money=0x7f020069;
-        public static final int triangle_science=0x7f02006a;
-        public static final int triangle_wonder=0x7f02006b;
-        public static final int vpi__tab_indicator=0x7f02006c;
-        public static final int vpi__tab_selected_focused_holo=0x7f02006d;
-        public static final int vpi__tab_selected_holo=0x7f02006e;
-        public static final int vpi__tab_selected_pressed_holo=0x7f02006f;
-        public static final int vpi__tab_unselected_focused_holo=0x7f020070;
-        public static final int vpi__tab_unselected_holo=0x7f020071;
-        public static final int vpi__tab_unselected_pressed_holo=0x7f020072;
-        public static final int wonder=0x7f020073;
+        public static final int triangle_debt=0x7f020066;
+        public static final int triangle_guilds=0x7f020067;
+        public static final int triangle_leader=0x7f020068;
+        public static final int triangle_military=0x7f020069;
+        public static final int triangle_money=0x7f02006a;
+        public static final int triangle_science=0x7f02006b;
+        public static final int triangle_wonder=0x7f02006c;
+        public static final int vpi__tab_indicator=0x7f02006d;
+        public static final int vpi__tab_selected_focused_holo=0x7f02006e;
+        public static final int vpi__tab_selected_holo=0x7f02006f;
+        public static final int vpi__tab_selected_pressed_holo=0x7f020070;
+        public static final int vpi__tab_unselected_focused_holo=0x7f020071;
+        public static final int vpi__tab_unselected_holo=0x7f020072;
+        public static final int vpi__tab_unselected_pressed_holo=0x7f020073;
+        public static final int wonder=0x7f020074;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f040025;
@@ -1161,25 +1162,25 @@ containing a value of this type.
         public static final int indicatorzulu=0x7f040034;
         public static final int listMode=0x7f040005;
         public static final int main=0x7f040033;
-        public static final int medalBox=0x7f04002b;
-        public static final int neg=0x7f040030;
+        public static final int medalBox=0x7f04002e;
+        public static final int neg=0x7f040031;
         public static final int none=0x7f040000;
         public static final int normal=0x7f040004;
-        public static final int numberBar=0x7f040032;
         public static final int pagerContent=0x7f040036;
         public static final int playerName=0x7f04002a;
-        public static final int pos=0x7f040031;
-        public static final int removePlayer=0x7f04002d;
-        public static final int scoreBlock=0x7f04002e;
+        public static final int pos=0x7f040032;
+        public static final int removePlayerButton=0x7f04002b;
+        public static final int scoreBlock=0x7f04002f;
         public static final int showCustom=0x7f04000b;
         public static final int showHome=0x7f040008;
         public static final int showTitle=0x7f04000a;
-        public static final int stepScore=0x7f04002f;
+        public static final int stepScore=0x7f040030;
         public static final int tabMode=0x7f040006;
-        public static final int totalScore=0x7f04002c;
+        public static final int totalScore=0x7f04002d;
         public static final int triangle=0x7f040001;
         public static final int underline=0x7f040002;
         public static final int useLogo=0x7f040007;
+        public static final int wonderName=0x7f04002c;
         public static final int wrap_content=0x7f040003;
     }
     public static final class integer {
@@ -1210,9 +1211,9 @@ containing a value of this type.
         public static final int abs__screen_action_bar_overlay=0x7f030011;
         public static final int abs__screen_simple=0x7f030012;
         public static final int abs__screen_simple_overlay_action_mode=0x7f030013;
-        public static final int player_mod_buttons=0x7f030014;
-        public static final int playerblock=0x7f030015;
-        public static final int pyplayer_stringblock=0x7f030016;
+        public static final int player_item=0x7f030014;
+        public static final int result_item=0x7f030015;
+        public static final int score_item=0x7f030016;
         public static final int sherlock_spinner_dropdown_item=0x7f030017;
         public static final int sherlock_spinner_item=0x7f030018;
         public static final int tab_navigation=0x7f030019;
@@ -1253,6 +1254,7 @@ containing a value of this type.
         public static final int app_name=0x7f0a000b;
         public static final int des=0x7f0a000a;
         public static final int removePlayer=0x7f0a000c;
+        public static final int resetScore=0x7f0a000e;
     }
     public static final class style {
         public static final int DialogWindowTitle_Sherlock=0x7f090036;

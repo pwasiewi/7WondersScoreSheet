@@ -5,6 +5,7 @@
     <string name="app_name">7 Wonders Score Sheet</string>
     <string name="removePlayer">Remove Player</string>
     <string name="addPlayer">Add Player</string>
+    <string name="resetScore">Reset Score</string>
 	<string-array name="tabs">
 	    <item>Players</item>
 	    <item>Military</item>
@@ -15,6 +16,7 @@
 	    <item>Guilds</item>
 	    <item>Science</item>
 	    <item>Leaders</item>
+	    <item>Debt</item>
 	    <item>Results</item>
 	</string-array>
 	<string-array name="medals">
@@ -26,5 +28,6 @@
 	    <item>R.drawable.guilds</item>
 	    <item>R.drawable.science</item>
 	    <item>R.drawable.leader</item>
+	    <item>R.drawable.debt</item>
 	</string-array>
 </resources>

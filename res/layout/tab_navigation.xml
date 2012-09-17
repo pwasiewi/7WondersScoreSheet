@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         />
     
-    <android.support.v4.view.ViewPager
+    <com.aceanuu.swss.CustomViewPager
 	    android:layout_height="match_parent"
 	    android:layout_width="match_parent" 
 	    android:id="@+id/awesomepager"/>

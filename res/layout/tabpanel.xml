@@ -3,20 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     
-    <ListView    
+    <com.aceanuu.swss.AceListView    
         android:descendantFocusability="afterDescendants"
-	android:id="@+id/pagerContent"
-    android:layout_alignParentTop="true"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-    </ListView>     
-    
-<!-- 	<Button -->
-<!-- 		android:layout_alignParentBottom="true" -->
-<!-- 		android:layout_width="match_parent" -->
-<!-- 		android:layout_height="52dp"  -->
-<!-- 		android:text="Add Player"> -->
-<!-- 	</Button> -->
+        android:clickable="false"
+		android:id="@+id/pagerContent"
+	    android:layout_alignParentTop="true"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent" >
+    </com.aceanuu.swss.AceListView>     
     
 
 </RelativeLayout>
