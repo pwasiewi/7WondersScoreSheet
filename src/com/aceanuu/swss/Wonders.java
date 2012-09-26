@@ -1,5 +1,0 @@
-package com.aceanuu.swss;
-
-public enum Wonders {
-    BABYLON, RHODOS, ALEXANDRIA, EPHOSOS, OLYMPIA, GIZA, HALIKARNASSOS, MANNEKEN_PIS, CATAN, PETRA, BYZANTIUM
-}

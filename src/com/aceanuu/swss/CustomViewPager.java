@@ -6,13 +6,15 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class CustomViewPager extends ViewPager {
 
     private int childId;    
-
-    public CustomViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    Context context;
+    public CustomViewPager(Context _context, AttributeSet attrs) {
+        super(_context, attrs);
+        context = _context;
     }   
 
     @Override
@@ -33,4 +35,5 @@ public class CustomViewPager extends ViewPager {
     public void setChildId(int id) {
         this.childId = id;
     }
+    
 }

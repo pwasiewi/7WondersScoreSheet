@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="46dp"
 	android:paddingTop="4dp"
 	android:paddingBottom="4dp"
     android:paddingRight="10dp"
     android:paddingLeft="10dp"
+	android:minHeight="46dp"
 	android:orientation="horizontal">
 		<TextView
 		    android:textColor="#fff"
@@ -13,13 +13,13 @@
             android:shadowRadius="2"
             android:shadowDx="1"
             android:shadowDy="3" 
+		    android:layout_centerVertical="true"
+		    android:layout_alignParentLeft="true"
 	        android:id="@+id/playerName"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-		    android:layout_centerVertical="true"
-		    android:layout_alignParentLeft="true"
 		    android:text="Player_Name"/>   
-		<TextView
+		<Spinner
 			android:gravity="right"
 		    android:textColor="#fff"
             android:shadowColor="#000000" 
@@ -28,10 +28,11 @@
             android:shadowDy="3" 
             android:layout_alignParentRight="true"
 		    android:layout_centerVertical="true"
+	        android:id="@+id/wonderName"
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"	
-	        android:id="@+id/wonderName"		
-		    android:text="Wonder_Name"/>   
+			android:layout_height="wrap_content"		
+            android:entries="@array/wonders"	
+		    android:text="Wonder_Name"/>    
 		<CheckBox
 		    android:layout_centerVertical="true"
 		    android:layout_alignParentRight="true"

@@ -1,43 +1,50 @@
 package com.aceanuu.swss;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
+import com.aceanuu.swss.logic.Game;
+import com.aceanuu.swss.logic.Stages;
+import com.aceanuu.swss.logic.Wonders;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -45,112 +52,89 @@ import com.viewpagerindicator.TabPageIndicator;
 
 
 public class SevenWonderMain extends SherlockActivity {
-
-    ScrollView                           tabContents;
-    int                                  numPlayers;
-    LinearLayout                         mainBody;
-    ActionBar                            ab;
-    AwesomePagerAdapter                  awesomeAdapter;
-    CustomViewPager                      awesomePager;
-    int                                  dp52;
-    int                                  dp28;
-    String[]                             tabTitles;
-    ArrayList<Integer>                   medals;
-    boolean                              expanded;
-    ArrayList<Integer>                   winners;
-    LayoutInflater                       factory;
-    final int                            NUM_TABS = 11;
+    
+    private final int                    NUM_TABS;
+    private Game                         current_game;
+    
+    private final Wonders[]              wonder_list;
+    private final Stages[]               stages_list;
+    private String[]               tab_titles;
+    
+    private SevenWonderAdapter           pagerAdapter;
+    private CustomViewPager              viewPager;
+    
+    private int                          dp28;
+    
+    private LayoutInflater               factory;
     private Context                      ctx;
-    public PlayerAdapter                 nameAdapter;
-    public ArrayList<ScoreAdapter>       scoreAdapterList;
-    public SumAdapter                    sumAdapter;
-    public ArrayList<String>             playerNames;
-    public ArrayList<Integer>            sumList;
-    public ArrayList<ArrayList<Integer>> stepWinner;
-    int                                  currentMax;
-
-    public void init() {
-        currentMax = -99999999;
-        winners = new ArrayList<Integer>();
-        stepWinner = new ArrayList<ArrayList<Integer>>();
-        expanded = true;
-
-        ctx = this.getApplicationContext();
-        playerNames = new ArrayList<String>();
-
-        scoreAdapterList = new ArrayList<ScoreAdapter>();
-        for (int i = 0; i < NUM_TABS - 2; i++) {
-            scoreAdapterList.add(new ScoreAdapter(i));
-            stepWinner.add(new ArrayList<Integer>());
-
-        }
-        nameAdapter = new PlayerAdapter();
-        sumAdapter = new SumAdapter();
-
-        sumList = new ArrayList<Integer>();
-
-        awesomeAdapter = new AwesomePagerAdapter();
-        awesomePager = (CustomViewPager) findViewById(R.id.awesomepager);
-        awesomePager.setAdapter(awesomeAdapter);
-
-        
-        awesomePager.setChildId(0);
-        awesomePager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {            
-            @Override
-            public void onPageSelected(int position) {
-                if (position == 0) {
-                    awesomePager.setChildId(0);
-                } else {
-                    awesomePager.setChildId(20);
-                }
-            }
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-        mainBody = (LinearLayout) findViewById(R.id.main);
-
-        final float scale = getResources().getDisplayMetrics().density;
-        dp52 = (int) (52 * scale + 0.5f);
-        dp28 = (int) (28 * scale + 0.5f);
-
-        numPlayers = 0;
-        factory = LayoutInflater.from(this);
-
-        tabTitles = this.getResources().getStringArray(R.array.tabs);
-
-        medals = new ArrayList<Integer>();
-        medals.add(R.drawable.triangle_military);
-        medals.add(R.drawable.triangle_money);
-        medals.add(R.drawable.triangle_wonder);
-        medals.add(R.drawable.triangle_civilian);
-        medals.add(R.drawable.triangle_commercial);
-        medals.add(R.drawable.triangle_guilds);
-        medals.add(R.drawable.triangle_science);
-        medals.add(R.drawable.triangle_leader);
-        medals.add(R.drawable.triangle_debt);
-
+    
+    private PlayerAdapter                nameAdapter;
+    private SumAdapter                   sumAdapter;
+    private ArrayList<ScoreAdapter>      scoreAdapterList;
+    private Map<Stages, Drawable>        stage_medals;
+    
+    public SevenWonderMain() {
+        wonder_list   = Wonders.values();
+        stages_list   = Stages.values();
+        NUM_TABS      = stages_list.length;
     }
     
     
+    public void initializeData() {
+        
+        current_game = new Game();
+        tab_titles   = getResources().getStringArray(R.array.tabs);
+
+        nameAdapter  = new PlayerAdapter();
+        sumAdapter   = new SumAdapter();
+
+        ctx          = this.getApplicationContext();
+        
+        final float scale = getResources().getDisplayMetrics().density;
+        dp28 = (int) (28 * scale + 0.5f);
+        
+        scoreAdapterList = new ArrayList<ScoreAdapter>();
+        
+        for (Stages this_step : current_game.scoring_stages) {
+            scoreAdapterList.add(new ScoreAdapter(this_step));
+        }
+        
+
+        TypedArray medal_images = getResources().obtainTypedArray(R.array.medals);
+        stage_medals = new HashMap<Stages, Drawable>();  
+        for(int i = 0; i < medal_images.length(); ++i) 
+        {
+            stage_medals.put(current_game.scoring_stages.get(i), medal_images.getDrawable(i));
+        }
+        
+    }
     
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.tab_navigation);
-        init();
+    public void initializeViews() {
 
-        // this.getActionBar().setTitle("Score Sheet");
+        getSupportActionBar().setTitle("Score Sheet");
+        
+        factory          = LayoutInflater.from(this);
+        viewPager        = (CustomViewPager) findViewById(R.id.awesomepager);
 
-        TabPageIndicator tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
-        tabInd.setViewPager(awesomePager);
+        pagerAdapter     = new SevenWonderAdapter();
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setChildId(0);
+    }
+    
+    public void initializeListeners() {
+
+        final LinearLayout players_bar      = (LinearLayout)   this.findViewById(R.id.create_bottom_bar);
+        final LinearLayout results_bar      = (LinearLayout)   this.findViewById(R.id.results_bottom_bar);
+        final LinearLayout bottom_container = (LinearLayout)   this.findViewById(R.id.bottom_bar);
+
+        final LinearLayout players_edit_click    = (LinearLayout) this.findViewById(R.id.edit_wonder_bottom);
+        final LinearLayout players_remove_click  = (LinearLayout) this.findViewById(R.id.remove_player_bottom);
+
+        players_remove_click.setEnabled(true);
+        players_edit_click.setEnabled(true);
+        
+        final TabPageIndicator tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
+        tabInd.setViewPager(viewPager);
 
         tabInd.setOnPageChangeListener(new OnPageChangeListener() {
 
@@ -164,12 +148,89 @@ public class SevenWonderMain extends SherlockActivity {
 
             @Override
             public void onPageSelected(int position) {
-                if (position == NUM_TABS - 1) {
-                    sumScore();
-                    // Log.i("SS", "Sum SCORE: " + position);
+                Stages this_stage = stages_list[position];
+                
+                if (this_stage == Stages.RESULTS) {
+                    current_game.generateResults();
+                    viewPager.setChildId(20);
+                    
+                    bottom_container.setVisibility(View.VISIBLE);
+                    results_bar.setVisibility(View.VISIBLE);
+                    players_bar.setVisibility(View.INVISIBLE);
+                    
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(tabInd.getWindowToken(), 0);
+                }
+                else if (this_stage == Stages.PLAYERS) 
+                {
+                    viewPager.setChildId(0);
+                    bottom_container.setVisibility(View.VISIBLE);
+                    players_bar.setVisibility(View.VISIBLE);
+                    results_bar.setVisibility(View.INVISIBLE);
+                }
+                else
+                {
+                    bottom_container.setVisibility(View.GONE);
                 }
             }
         });
+        
+
+        players_edit_click.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if(!nameAdapter.editMode)
+                {
+                    nameAdapter.toggleEditMode();
+                    Button edit_button = (Button) findViewById(R.id.edit_wonder_button);
+                    edit_button.setText(R.string.change_selected_prompt);
+                    players_remove_click.setEnabled(false);
+                }
+                else
+                {
+                    nameAdapter.commitSelectedWonders();
+                    nameAdapter.toggleEditMode();
+                    Button edit_button = (Button) findViewById(R.id.edit_wonder_button);
+                    edit_button.setText(R.string.change_wonder_prompt);
+                    players_remove_click.setEnabled(true);
+                }
+            }
+        });  
+        
+        players_remove_click.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if(!nameAdapter.removeMode)
+                {
+                    nameAdapter.toggleRemoveMode();
+                    
+                    Button remove_button = (Button) findViewById(R.id.remove_player_button);
+                    remove_button.setText(R.string.remove_selected_prompt);
+                    players_edit_click.setEnabled(false);
+                }
+                else
+                {
+                    nameAdapter.removeSelected();
+                    nameAdapter.toggleRemoveMode();
+                    
+                    Button remove_button = (Button) findViewById(R.id.remove_player_button);
+                    remove_button.setText(R.string.remove_players_prompt);
+                    players_edit_click.setEnabled(true);
+                }
+            }
+        });    
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_ui);
+        initializeData();
+        initializeViews();
+        initializeListeners();
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -184,27 +245,20 @@ public class SevenWonderMain extends SherlockActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // This uses the imported MenuItem from ActionBarSherlock
+        
         char sc = item.getNumericShortcut();
         if (sc == '0') {
             Dialog temp = new AlertDialog.Builder(this)
                     .setTitle("Reset Scores?")
                     .setPositiveButton("Reset",
                             new DialogInterface.OnClickListener() {
-
-                                public void onClick(DialogInterface dialog,
-                                        int which) {
+                                public void onClick(DialogInterface dialog, int which) {
                                     resetScores();
                                 }
-
                             })
                     .setNegativeButton("Cancel",
                             new DialogInterface.OnClickListener() {
-
-                                public void onClick(DialogInterface dialog,
-                                        int whichButton) {
-
-                                    /* User clicked No so do some stuff */
+                                public void onClick(DialogInterface dialog,int whichButton) {
                                 }
                             }).create();
 
@@ -212,13 +266,14 @@ public class SevenWonderMain extends SherlockActivity {
 
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    // resetScores();
                 }
             });
 
             temp.show();
             return true;
-        } else if (sc == '3') {
+        } else 
+        if (sc == '3') 
+        {
             addPlayerPrompt();
             return true;
         }
@@ -228,48 +283,48 @@ public class SevenWonderMain extends SherlockActivity {
     }
 
     public void resetScores() {
-        for (int i = 0; i < playerNames.size(); i++) {
 
-            for (int step = 0; step < scoreAdapterList.size(); step++) {
-                scoreAdapterList.get(step).thisStepScoreList.set(i, 0);
-            }
-            sumList.set(i, 0);
-
-        }
-        currentMax = -999999999;
-        winners.clear();
-        sumScore();
+        current_game.newGame();
+        viewPager.setCurrentItem(0);
         notifyAllAdapters();
 
     }
 
     private void addPlayerPrompt() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final View playerPromptView = factory.inflate(R.layout.player_dialog, null);
+        final Spinner spinnerWonder = (Spinner) playerPromptView.findViewById(R.id.wonder_spinner);
+        final EditText inputName = (EditText) playerPromptView.findViewById(R.id.player_name);
+        
+        inputName.requestFocus();
         alert.setTitle("Player Name");
-        alert.setMessage("Enter Player Name");
+        alert.setView(playerPromptView);
+        
+        spinnerWonder.setOnTouchListener(new OnTouchListener() {
 
-        final EditText input = new EditText(this);
-        input.setInputType(16384);
-        input.requestFocus();
-        alert.setView(input);
-
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(inputName.getWindowToken(), 0);
+                return false;
+            }
+        });
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                if (input.getText().toString().length() > 0)
-                    addPlayer(input.getText().toString());
-                else {
-                    Toast.makeText(ctx, "Must Enter a Player Name",
-                            Toast.LENGTH_SHORT).show();
+                if (inputName.getText().toString().length() > 0)
+                {
+                    addPlayer(inputName.getText().toString(),  wonder_list[spinnerWonder.getSelectedItemPosition()]);
+                }
+                else 
+                {
+                    Toast.makeText(ctx, "Must Enter a Player Name",Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
-
                 }
             }
         });
-
         alert.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
-
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
@@ -277,127 +332,18 @@ public class SevenWonderMain extends SherlockActivity {
 
         AlertDialog alertToShow = alert.create();
 
-        alertToShow.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        alertToShow.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alertToShow.show();
     }
 
-    public void setWinner() {
-
-        winners.clear();
-        currentMax = 0;
-
-        for (int i = 0; i < playerNames.size(); i++) {
-            if (sumList.get(i) == currentMax) {
-                if (!winners.contains(i))
-                    winners.add(i);
-            } else if (sumList.get(i) > currentMax) {
-                currentMax = sumList.get(i);
-                winners.clear();
-                winners.add(i);
-            }
-        }
-
-        // for(int herp : winners)
-        // {
-        // // Log.i("WINNER", "Winner Index: " + herp);
-        // }
-
-    }
-
-    private void addPlayer(String name) {
-
-        playerNames.add(name);
-        for (int step = 0; step < scoreAdapterList.size(); step++) {
-            Log.i("addPlayer", step + ": scoreAdapterList.get(step).thisStepScoreList.add(0);");
-            scoreAdapterList.get(step).thisStepScoreList.add(0);
-        }
-        sumList.add(0);
-
-        winners.clear();
-        sumScore();
+    private void addPlayer(String name, Wonders wonder) {
+        current_game.addPlayer(name, wonder);
         notifyAllAdapters();
     }
 
     private void removePlayer(int position) {
 
-        playerNames.remove(position);
-        for (int step = 0; step < scoreAdapterList.size(); step++) {
-
-            scoreAdapterList.get(step).thisStepScoreList.remove(position);
-        }
-        sumList.remove(position);
-        notifyAllAdapters();
-    }
-
-    private void sumScore() {
-        //
-        // Log.i("sumScore", "Score Summed");
-        // //OLD STEP SCORING
-        // for(int i = 0; i < playerNames.size(); i++)
-        // {
-        // int tempScore = 0;
-        //
-        // for(int step = 0; step < scoreAdapterList.size(); step++)
-        // {
-        // tempScore += scoreAdapterList.get(step).thisStepScoreList.get(i);
-        // }
-        //
-        // sumList.set(i, tempScore);
-        // }
-
-        int temp = 0;
-        int stepMax;
-
-        Log.i("Debug Medals",
-                "BEGIN DEBUG ========================================");
-        for (int i = 0; i < NUM_TABS - 2; i++) {
-            stepMax = -9999999;
-            Log.i("Debug Medals", tabTitles[i + 1]
-                    + "-------------------------------");
-            for (int p = 0; p < playerNames.size(); p++) {
-
-                temp = 0;
-                if (i == 0) {
-
-                    // Log.i("Debug Medals", "RESET SCORE");
-                    sumList.set(p, 0);
-                }
-                int thisStepScore = scoreAdapterList.get(i).thisStepScoreList
-                        .get(p);
-
-                // Log.i("Debug Medals", "Step:" + thisStepScore);
-                Log.i("Debug Medals", "Player Name: " + playerNames.get(p)
-                        + " = " + thisStepScore);
-
-                temp = sumList.get(p) + thisStepScore;
-
-                sumList.set(p, temp);
-
-                if (stepMax < thisStepScore) {
-                    stepMax = thisStepScore;
-                    stepWinner.get(i).clear();
-                    if (thisStepScore != 0) {
-                        stepWinner.get(i).add(p);
-                        Log.i("Debug Medals", playerNames.get(p) + " WINS");
-                    } else
-                        Log.i("Debug Medals", playerNames.get(p)
-                                + " WINS with ZERO");
-                } else if (stepMax == thisStepScore) {
-
-                    if (thisStepScore != 0) {
-                        stepWinner.get(i).add(p);
-                        Log.i("Debug Medals", playerNames.get(p) + " TIES");
-                    } else
-                        Log.i("Debug Medals", playerNames.get(p)
-                                + " TIES with ZERO");
-
-                }
-            }
-
-        }
-
-        setWinner();
+        current_game.removePlayer(position);
         notifyAllAdapters();
     }
 
@@ -409,8 +355,8 @@ public class SevenWonderMain extends SherlockActivity {
         }
     }
 
-    public class AwesomePagerAdapter extends PagerAdapter {
-
+    public class SevenWonderAdapter extends PagerAdapter {
+        
         @Override
         public int getCount() {
             return NUM_TABS;
@@ -418,29 +364,32 @@ public class SevenWonderMain extends SherlockActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return tabTitles[position % tabTitles.length].toUpperCase();
+            return tab_titles[position % tab_titles.length].toUpperCase();
         }
 
         @Override
         public Object instantiateItem(View collection, int position) {
 
-            // Log.i("PagerDerpin", "Page Position: " + position);
-
+            Stages this_stage = stages_list[position];
+            
             View temp = getLayoutInflater().inflate(R.layout.tabpanel, null);
             ((ViewPager) collection).addView(temp, 0);
 
-            if (position == 0) {
+            if (this_stage == Stages.PLAYERS) 
+            {
                 ListView content = (ListView) temp.findViewById(R.id.pagerContent);
                 content.setAdapter(nameAdapter);
 
                 return temp;
-            } else if (position == (NUM_TABS - 1)) {
-                // Log.i("HOLY HELL", "MAKING SUM ADAPTER @ POSITION: " +
-                // position);
+            } 
+            else if (this_stage == Stages.RESULTS) 
+            {
                 ListView content = (ListView) temp.findViewById(R.id.pagerContent);
                 content.setAdapter(sumAdapter);
                 return temp;
-            } else {
+            }
+            else 
+            {
                 ListView content = (ListView) temp.findViewById(R.id.pagerContent);
                 content.setAdapter(scoreAdapterList.get(position - 1));
                 View tempView = content.getChildAt(0);
@@ -452,7 +401,6 @@ public class SevenWonderMain extends SherlockActivity {
                         tempView.requestFocus();
                     }
                 }
-//
                 return temp;
             }
         }
@@ -469,13 +417,10 @@ public class SevenWonderMain extends SherlockActivity {
 
         @Override
         public void finishUpdate(View arg0) {
-
-            int newCur = awesomePager.getCurrentItem();
         }
 
         @Override
         public void startUpdate(View arg0) {
-
         }
 
         @Override
@@ -490,18 +435,67 @@ public class SevenWonderMain extends SherlockActivity {
 
     private class PlayerAdapter extends BaseAdapter {
 
+        boolean removeMode;
+        boolean editMode;
+        ArrayList<CheckBox> removeList;
+        ArrayList<Spinner>  spinnerList;
+        
         public PlayerAdapter() {
+            removeMode = false;
+            removeList = new ArrayList<CheckBox>();
+            spinnerList= new ArrayList<Spinner>();
+        }
 
+        public void commitSelectedWonders() {
+            for(int i = 0; i < current_game.playerCount(); ++i)
+            {
+                current_game.getPlayer(i).setWonder(wonder_list[spinnerList.get(i).getSelectedItemPosition()]);
+            }
+        }
+
+        public void toggleEditMode() {
+            if(!editMode)
+            {
+                spinnerList= new ArrayList<Spinner>();
+            }
+            editMode = !editMode;
+            this.notifyDataSetChanged();
+        }
+
+        public void toggleRemoveMode() {
+            if(!removeMode)
+            {
+                removeList = new ArrayList<CheckBox>();
+            }
+            removeMode = !removeMode;
+            this.notifyDataSetChanged();
+            
+        }
+        
+        public void removeSelected() {
+            ArrayList<Integer> positionsToRemove = new ArrayList<Integer>();
+            for(CheckBox thisBox : removeList)
+            {
+                if(thisBox.isChecked())
+                {
+                    positionsToRemove.add((Integer)thisBox.getTag());
+                }
+            }
+            
+            for(int i = 0; i < positionsToRemove.size(); ++i)
+            {
+                removePlayer(positionsToRemove.get(i)-i);
+            }
         }
 
         @Override
         public int getCount() {
-            return playerNames.size();
+            return current_game.playerCount();
         }
-
+        
         @Override
         public Object getItem(int position) {
-            return playerNames.get(position);
+            return current_game.getPlayer(position);
         }
 
         @Override
@@ -511,21 +505,36 @@ public class SevenWonderMain extends SherlockActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            RelativeLayout tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(com.aceanuu.swss.R.layout.player_item, null);
-            TextView playerName = (TextView) tempView.findViewById(R.id.playerName);
-            playerName.setText(playerNames.get(position));
-            
-            
-            Button remove = (Button) tempView.findViewById(R.id.removePlayerButton);
-            remove.setTag(position);
-            remove.setOnClickListener(new OnClickListener() {
+            RelativeLayout tempView;
+            if(removeMode)
+            {
+                tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.player_item_remove, null);
+                
+                TextView wonderName = (TextView) tempView.findViewById(R.id.wonderName);
+                wonderName.setText(current_game.getPlayer(position).getWonderName());
+                
+                CheckBox remove = (CheckBox) tempView.findViewById(R.id.removePlayerCheck);
+                remove.setTag(position);
+                removeList.add(remove);
+            }else if(editMode)
+            {
+                tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.player_item_edit, null);
 
-                @Override
-                public void onClick(View arg0) {
-                    removePlayer((Integer)arg0.getTag());
-                    notifyDataSetChanged();
-                }
-            });
+                Spinner wonderSpinner = (Spinner) tempView.findViewById(R.id.wonderName);
+                wonderSpinner.setSelection(current_game.getPlayer(position).getWonder().ordinal());
+                spinnerList.add(wonderSpinner);
+                
+            }else
+            {
+                tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.player_item, null);
+                
+                TextView wonderName = (TextView) tempView.findViewById(R.id.wonderName);
+                wonderName.setText(current_game.getPlayer(position).getWonderName());
+            }
+
+            TextView playerName = (TextView) tempView.findViewById(R.id.playerName);
+            playerName.setText(current_game.getPlayer(position).getName());
+            
             return tempView;
         }
     }
@@ -533,33 +542,28 @@ public class SevenWonderMain extends SherlockActivity {
 
     private class ScoreAdapter extends BaseAdapter {
 
-        int                            adapterIndex;
-        private LayoutInflater mInflater;
-        ArrayList<Integer>            thisStepScoreList;
+        Stages                                    stage;
+        private LayoutInflater                mInflater;
 
-        public ScoreAdapter(int ind) {
-            mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            thisStepScoreList = new ArrayList<Integer>();
-            adapterIndex = ind;
-            playerNames = new ArrayList<String>();
+        public ScoreAdapter(Stages _stage) {
+            stage             = _stage;
+            mInflater         = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public int getCount() {
-            return playerNames.size();
+            return current_game.playerCount();
         }
 
         @Override
         public Object getItem(int position) {
-            return playerNames.get(position);
+            return current_game.getPlayerStageScore(position, stage);
         }
 
         @Override
         public long getItemId(int position) {
             return 0;
         }
-
-        
         
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -570,12 +574,10 @@ public class SevenWonderMain extends SherlockActivity {
                 holder = new ViewHolder();
                 convertView = mInflater.inflate(R.layout.score_item, null);
 
-                holder.val = (EditText) convertView.findViewById(R.id.stepScore);
-                holder.val.setHint("0");
-                
+                holder.val = (EditText) convertView.findViewById(R.id.stepScore);                
                 
                 holder.name = (TextView) convertView.findViewById(R.id.playerName);
-                holder.name.setText(playerNames.get(position));
+                holder.name.setText(current_game.getPlayer(position).getName()); 
                
                 holder.pos = (Button) convertView.findViewById(R.id.pos);
                 holder.neg = (Button) convertView.findViewById(R.id.neg);
@@ -587,110 +589,84 @@ public class SevenWonderMain extends SherlockActivity {
             }
             
          
-            Log.d("getV", "EditText is "+ (holder.val != null) +", pos " + position);
-            holder.val.setText(thisStepScoreList.get(position) + "");
             
             final int f_position = position;
             
             //Fill EditText with the value you have in data source
-            holder.val.setText(thisStepScoreList.get(position) + "");
+            int score_item = current_game.getPlayerStageScore(position, stage);
+            if(score_item != 0)
+                holder.val.setText(score_item + "");
+                
             holder.val.setId(position);
 
             //so it can be used below
             final EditText score = holder.val;
             
-            //we need to update adapter once we finish with editing
-//            holder.val.setOnFocusChangeListener(new OnFocusChangeListener() {
-//                public void onFocusChange(View v, boolean hasFocus) {
-//                    if (!hasFocus){
-//                        final int position = v.getId();
-//                        final EditText Caption = (EditText) v;
-//                        thisStepScoreList.set(position, Integer.parseInt(Caption.getText().toString()));
-//                    }
-//                }
-//            });
-            holder.val.setOnFocusChangeListener(new OnFocusChangeListener() {
-
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if(!hasFocus)
-                    {
-                        if (score.getText().toString().length() == 0)
-                        {
-                            thisStepScoreList.set(f_position, 0);
-                            score.setHint("0");
-                        }
-                        else 
-                        {
-                            if (score.getText().toString() == "-")
-                            {
-                                thisStepScoreList.set(f_position, 0);
-                                score.setHint("0");
-                            }
-                            else 
-                            {
-                                int temp = Integer.parseInt(score.getText().toString());
-                                thisStepScoreList.set(f_position, temp);
-                                score.setText(temp+"");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        score.selectAll();
-                    }
-                    
-                }
-            });
-            
             holder.pos.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View arg0) {
-                    int scoreval = Integer.parseInt(score.getText().toString());
-                    scoreval++;
-                    score.setText(scoreval + "");
+                    try {
+                          int scoreval = Integer.parseInt(score.getText().toString());
+                          scoreval++;
+                          score.setText(scoreval + "");
+                    }catch(Exception e)
+                    {
+                        score.setText("1");
+                        
+                    }
                 }
             });
             holder.neg.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View arg0) {
-                    int scoreval = Integer.parseInt(score.getText().toString());
-                    scoreval--;
-                    score.setText(scoreval + "");
+                    try {
+                        int scoreval = Integer.parseInt(score.getText().toString());
+                        scoreval--;
+                        score.setText(scoreval + "");
+                    }
+                    catch(Exception e)
+                    {
+                        score.setText("-1");  
+                    }
                 }
+                
             });
          
-            
             holder.val.addTextChangedListener(new TextWatcher() {
                 
                 public void afterTextChanged(Editable s) {
-                    if (score.getText().toString().length() == 0)
+                    
+                    int value;
+                    if (score.getText().toString().equals("") || score.getText().toString().equals("-"))
                     {
-                        thisStepScoreList.set(f_position, 0);
-                        score.setHint("0");
+                        value = 0;
+                    }else
+                    if (score.getText().toString().equals("0") )
+                    {
+                        value = 0;
+                        score.setText("");
                     }
                     else 
-                    {
-                        if (score.getText().toString() == "-")
+                    {  
+                        try 
                         {
-                            thisStepScoreList.set(f_position, 0);
-                            score.setHint("0");
+                            value = Integer.parseInt(score.getText().toString());
                         }
-                        else 
+                        catch(Exception e)
                         {
-                            int temp = Integer.parseInt(score.getText().toString());
-                            thisStepScoreList.set(f_position, temp);
+                            score.setText("");
+                            value = 0;
                         }
                     }
+                    current_game.setPlayerStageScore(f_position, stage, value);
                 }      
-                public void beforeTextChanged(CharSequence s, int start,
-                        int count, int after) {
+                
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
 
-                public void onTextChanged(CharSequence s, int start,
-                        int before, int count) {
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
                 }
             });
             
@@ -708,17 +684,14 @@ public class SevenWonderMain extends SherlockActivity {
     
     private class SumAdapter extends BaseAdapter {
 
-        public SumAdapter() {
-        }
-
         @Override
         public int getCount() {
-            return playerNames.size();
+            return current_game.playerCount();
         }
 
         @Override
         public Object getItem(int position) {
-            return playerNames.get(position);
+            return current_game.getPlayer(position);
         }
 
         @Override
@@ -728,39 +701,31 @@ public class SevenWonderMain extends SherlockActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            RelativeLayout tempView = (RelativeLayout) LayoutInflater.from(ctx)
-                    .inflate(com.aceanuu.swss.R.layout.result_item, null);
-            TextView playerName = (TextView) tempView
-                    .findViewById(R.id.playerName);
-            playerName.setText(playerNames.get(position));
+            RelativeLayout tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.result_item, null);
+            TextView name_box       = (TextView) tempView.findViewById(R.id.playerName);
+            TextView sum_box        = (TextView) tempView.findViewById(R.id.totalScore);
+            TextView position_box   = (TextView) tempView.findViewById(R.id.finishingPosition);
+            LinearLayout badge_box  = (LinearLayout) tempView.findViewById(R.id.medalBox);
+            
+            name_box.setText(current_game.getPlayer(position).getName());
+            sum_box.setText(current_game.getPlayer(position).getTotal() + "");
+            position_box.setText(current_game.getPlayer(position).getPlace() + "");
+            badge_box.setVisibility(View.VISIBLE);
 
-
-            TextView sumBox = (TextView) tempView.findViewById(R.id.totalScore);
-            sumBox.setText(sumList.get(position) + "");
-
-            LinearLayout medalBox = (LinearLayout) tempView.findViewById(R.id.medalBox);
-
-            medalBox.setVisibility(View.VISIBLE);
-
-            int i = 0;
-
-            for (ArrayList<Integer> playersForThisStep : stepWinner) {
-                if (playersForThisStep.contains(position)) {
-                    ImageView tempIV = new ImageView(ctx);
-                    Bitmap bmp = BitmapFactory.decodeResource(getResources(),
-                            medals.get(i));
-                    int width = dp28;
-                    int height = dp28;
-                    Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp,
-                            width, height, true);
+            for (Stages step_won : current_game.getPlayer(position).getStageWins()) {
+                if(stage_medals.containsKey(step_won))
+                {
+                    ImageView tempIV     = new ImageView(ctx);
+                    Bitmap bmp           =  ((BitmapDrawable)stage_medals.get(step_won)).getBitmap();
+                    Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp, dp28, dp28, true);
                     tempIV.setImageBitmap(resizedbitmap);
-                    medalBox.addView(tempIV);
+                    badge_box.addView(tempIV);
                 }
-                i++;
             }
 
-            if (winners.contains(position)) {
-                sumBox.setTextColor(Color.GREEN);
+            if (current_game.getPlayer(position).getPlace() == 1) {
+                sum_box.setTextColor(Color.GREEN);
+                position_box.setTextColor(Color.GREEN);
             }
 
             return tempView;

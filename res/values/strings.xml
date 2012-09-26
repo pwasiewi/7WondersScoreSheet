@@ -3,9 +3,32 @@
 
     <string name="des">Score keeping for the boardgame 7 Wonders.</string>
     <string name="app_name">7 Wonders Score Sheet</string>
+    
+    
+    <string name="abTitle">Score Sheet</string>
+    
     <string name="removePlayer">Remove Player</string>
     <string name="addPlayer">Add Player</string>
-    <string name="resetScore">Reset Score</string>
+    
+    <string name="resetScore">New Game</string>
+    <string name="add_players_prompt">Add Player</string>
+    
+    <string name="change_wonder_prompt">Edit Wonders</string>
+    <string name="change_selected_prompt">Save Changes</string>
+    
+    <string name="remove_selected_prompt">Remove Selected</string>
+    <string name="remove_players_prompt">Remove Players</string>
+    
+    
+    <string name="results_save">Save Results</string>
+    <string name="results_new">New Game</string>
+    
+    
+    <string name="player_name_label">Enter Player Name</string>
+    <string name="player_name_hint">Player</string>
+    
+    <string name="wonder_label">Select a Wonder</string>
+    
 	<string-array name="tabs">
 	    <item>Players</item>
 	    <item>Military</item>
@@ -19,15 +42,32 @@
 	    <item>Debt</item>
 	    <item>Results</item>
 	</string-array>
+	
 	<string-array name="medals">
-	    <item>R.drawable.military</item>
-	    <item>R.drawable.money</item>
-	    <item>R.drawable.wonder</item>
-	    <item>R.drawable.civilian</item>
-	    <item>R.drawable.commercial</item>
-	    <item>R.drawable.guilds</item>
-	    <item>R.drawable.science</item>
-	    <item>R.drawable.leader</item>
-	    <item>R.drawable.debt</item>
+	    <item>@drawable/triangle_military</item>
+	    <item>@drawable/triangle_money</item>
+	    <item>@drawable/triangle_wonder</item>
+	    <item>@drawable/triangle_civilian</item>
+	    <item>@drawable/triangle_commercial</item>
+	    <item>@drawable/triangle_guilds</item>
+	    <item>@drawable/triangle_science</item>
+	    <item>@drawable/triangle_leader</item>
+	    <item>@drawable/triangle_debt</item>
 	</string-array>
+	
+	<string-array name="wonders">
+	    <item>Alexandria</item>
+	    <item>Babylon</item>
+	    <item>Byzantium</item>
+	    <item>Catan</item>
+	    <item>Ephosos</item>
+	    <item>Giza</item>
+	    <item>Halikarnassos</item>
+	    <item>MannekenPis</item>
+	    <item>Olympia</item>
+	    <item>Petra</item>
+	    <item>Rhodos</item>
+	</string-array>
+	
+	
 </resources>

@@ -49,6 +49,7 @@
 				android:layout_width="52dp"
 				android:layout_height="wrap_content"
 			    android:gravity="center"
+			    android:hint="0"
 			    android:text="">    
 			</EditText>
 			<Button

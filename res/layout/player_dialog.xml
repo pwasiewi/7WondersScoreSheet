@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+
+    <TextView
+        android:id="@+id/player_name_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/player_name_label" />
+    
+
+    <EditText
+        android:id="@+id/player_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/player_name_label"
+        android:hint="@string/player_name_hint"  >
+
+        <requestFocus />
+    </EditText>
+    
+    <TextView
+        android:layout_marginTop="10dp"
+        android:id="@+id/wonder_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/player_name"
+        android:text="@string/wonder_label" />
+
+    <Spinner
+        android:id="@+id/wonder_spinner"	
+        android:entries="@array/wonders"	
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/wonder_label"
+        android:layout_alignParentLeft="true" />
+
+</RelativeLayout>

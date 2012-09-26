@@ -8,6 +8,7 @@
 	android:layout_height="46dp"
 	android:orientation="horizontal">
 		<TextView
+	    	android:textAppearance="?android:attr/textAppearanceLarge"
 		    android:textColor="#fff"
             android:shadowColor="#000000" 
             android:shadowRadius="2"
@@ -15,6 +16,21 @@
             android:shadowDy="3" 
 		    android:layout_centerVertical="true"
 		    android:layout_alignParentLeft="true"
+	        android:id="@+id/finishingPosition"
+			android:layout_width="30dp"
+			android:layout_height="46dp"
+			android:gravity="center"
+			android:paddingRight="10dp"
+		    android:text="">    
+		</TextView>	
+		<TextView
+		    android:textColor="#fff"
+            android:shadowColor="#000000" 
+            android:shadowRadius="2"
+            android:shadowDx="1"
+            android:shadowDy="3" 
+		    android:layout_centerVertical="true"
+		    android:layout_toRightOf="@id/finishingPosition"
 	        android:id="@+id/playerName"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
