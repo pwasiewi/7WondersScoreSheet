@@ -54,24 +54,25 @@ import com.viewpagerindicator.TabPageIndicator;
 public class SevenWonderMain extends SherlockActivity {
     
     private final int                    NUM_TABS;
-    private Game                         current_game;
+    private int                          dp28;
     
-    private final Wonders[]              wonder_list;
-    private final Stages[]               stages_list;
-    private String[]               tab_titles;
+    private Game                         current_game;
     
     private SevenWonderAdapter           pagerAdapter;
     private CustomViewPager              viewPager;
     
-    private int                          dp28;
-    
     private LayoutInflater               factory;
     private Context                      ctx;
+
+    private final Wonders[]              wonder_list;
+    private final Stages[]               stages_list;
+    private String[]                     tab_titles;
     
     private PlayerAdapter                nameAdapter;
     private SumAdapter                   sumAdapter;
     private ArrayList<ScoreAdapter>      scoreAdapterList;
     private Map<Stages, Drawable>        stage_medals;
+    
     
     public SevenWonderMain() {
         wonder_list   = Wonders.values();
@@ -81,7 +82,6 @@ public class SevenWonderMain extends SherlockActivity {
     
     
     public void initializeData() {
-        
         current_game = new Game();
         tab_titles   = getResources().getStringArray(R.array.tabs);
 
@@ -95,22 +95,17 @@ public class SevenWonderMain extends SherlockActivity {
         
         scoreAdapterList = new ArrayList<ScoreAdapter>();
         
-        for (Stages this_step : current_game.scoring_stages) {
+        for (Stages this_step : current_game.scoring_stages) 
             scoreAdapterList.add(new ScoreAdapter(this_step));
-        }
         
-
         TypedArray medal_images = getResources().obtainTypedArray(R.array.medals);
         stage_medals = new HashMap<Stages, Drawable>();  
         for(int i = 0; i < medal_images.length(); ++i) 
-        {
             stage_medals.put(current_game.scoring_stages.get(i), medal_images.getDrawable(i));
-        }
-        
     }
     
+    
     public void initializeViews() {
-
         getSupportActionBar().setTitle("Score Sheet");
         
         factory          = LayoutInflater.from(this);
@@ -121,8 +116,8 @@ public class SevenWonderMain extends SherlockActivity {
         viewPager.setChildId(0);
     }
     
+    
     public void initializeListeners() {
-
         final LinearLayout players_bar      = (LinearLayout)   this.findViewById(R.id.create_bottom_bar);
         final LinearLayout results_bar      = (LinearLayout)   this.findViewById(R.id.results_bottom_bar);
         final LinearLayout bottom_container = (LinearLayout)   this.findViewById(R.id.bottom_bar);
@@ -139,12 +134,10 @@ public class SevenWonderMain extends SherlockActivity {
         tabInd.setOnPageChangeListener(new OnPageChangeListener() {
 
             @Override
-            public void onPageScrollStateChanged(int arg0) {
-            }
+            public void onPageScrollStateChanged(int arg0) {}
 
             @Override
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-            }
+            public void onPageScrolled(int arg0, float arg1, int arg2) {}
 
             @Override
             public void onPageSelected(int position) {
@@ -155,8 +148,8 @@ public class SevenWonderMain extends SherlockActivity {
                     viewPager.setChildId(20);
                     
                     bottom_container.setVisibility(View.VISIBLE);
+                    players_bar.setVisibility(View.GONE);
                     results_bar.setVisibility(View.VISIBLE);
-                    players_bar.setVisibility(View.INVISIBLE);
                     
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(tabInd.getWindowToken(), 0);
@@ -166,7 +159,7 @@ public class SevenWonderMain extends SherlockActivity {
                     viewPager.setChildId(0);
                     bottom_container.setVisibility(View.VISIBLE);
                     players_bar.setVisibility(View.VISIBLE);
-                    results_bar.setVisibility(View.INVISIBLE);
+                    results_bar.setVisibility(View.GONE);
                 }
                 else
                 {
@@ -223,6 +216,7 @@ public class SevenWonderMain extends SherlockActivity {
         });    
     }
     
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,8 +224,8 @@ public class SevenWonderMain extends SherlockActivity {
         initializeData();
         initializeViews();
         initializeListeners();
-
     }
+    
 
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add("Reset Scores").setNumericShortcut('0')
@@ -243,9 +237,9 @@ public class SevenWonderMain extends SherlockActivity {
         return true;
     }
 
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        
         char sc = item.getNumericShortcut();
         if (sc == '0') {
             Dialog temp = new AlertDialog.Builder(this)
@@ -268,7 +262,6 @@ public class SevenWonderMain extends SherlockActivity {
                 public void onDismiss(DialogInterface dialog) {
                 }
             });
-
             temp.show();
             return true;
         } else 
@@ -277,19 +270,17 @@ public class SevenWonderMain extends SherlockActivity {
             addPlayerPrompt();
             return true;
         }
-
         return false;
-
     }
 
+    
     public void resetScores() {
-
         current_game.newGame();
         viewPager.setCurrentItem(0);
         notifyAllAdapters();
-
     }
 
+    
     private void addPlayerPrompt() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final View playerPromptView = factory.inflate(R.layout.player_dialog, null);
@@ -336,17 +327,19 @@ public class SevenWonderMain extends SherlockActivity {
         alertToShow.show();
     }
 
+    
     private void addPlayer(String name, Wonders wonder) {
         current_game.addPlayer(name, wonder);
         notifyAllAdapters();
     }
 
+    
     private void removePlayer(int position) {
-
         current_game.removePlayer(position);
         notifyAllAdapters();
     }
 
+    
     public void notifyAllAdapters() {
         nameAdapter.notifyDataSetChanged();
         sumAdapter.notifyDataSetChanged();
@@ -355,8 +348,9 @@ public class SevenWonderMain extends SherlockActivity {
         }
     }
 
+    
     public class SevenWonderAdapter extends PagerAdapter {
-        
+     
         @Override
         public int getCount() {
             return NUM_TABS;
@@ -416,16 +410,13 @@ public class SevenWonderMain extends SherlockActivity {
         }
 
         @Override
-        public void finishUpdate(View arg0) {
-        }
+        public void finishUpdate(View arg0) {}
 
         @Override
-        public void startUpdate(View arg0) {
-        }
+        public void startUpdate(View arg0) {}
 
         @Override
-        public void restoreState(Parcelable arg0, ClassLoader arg1) {
-        }
+        public void restoreState(Parcelable arg0, ClassLoader arg1) {}
 
         @Override
         public Parcelable saveState() {
@@ -433,6 +424,7 @@ public class SevenWonderMain extends SherlockActivity {
         }
     }
 
+    
     private class PlayerAdapter extends BaseAdapter {
 
         boolean removeMode;
@@ -587,9 +579,7 @@ public class SevenWonderMain extends SherlockActivity {
                 Log.w("getV", "convertView is not null, pos " + position);
                 holder = (ViewHolder) convertView.getTag();
             }
-            
-         
-            
+                        
             final int f_position = position;
             
             //Fill EditText with the value you have in data source
@@ -613,10 +603,10 @@ public class SevenWonderMain extends SherlockActivity {
                     }catch(Exception e)
                     {
                         score.setText("1");
-                        
                     }
                 }
             });
+            
             holder.neg.setOnClickListener(new OnClickListener() {
 
                 @Override
@@ -681,6 +671,7 @@ public class SevenWonderMain extends SherlockActivity {
         Button pos;
         Button neg;
     }
+
     
     private class SumAdapter extends BaseAdapter {
 
@@ -730,7 +721,5 @@ public class SevenWonderMain extends SherlockActivity {
 
             return tempView;
         }
-
     }
-
 }

@@ -15,7 +15,8 @@
     
 	
     <LinearLayout
-        android:visibility="visible"
+	android:background="@drawable/ab_solid_dark_holo"
+    android:visibility="visible"
     android:layout_alignParentBottom="true"
     android:id="@+id/bottom_bar"
     android:orientation="horizontal"
@@ -24,8 +25,7 @@
     android:layout_height="45dp" >
 	
 	    <LinearLayout
-	        android:visibility="visible"
-	    android:layout_alignParentBottom="true"
+	    android:visibility="visible"
 	    android:id="@+id/create_bottom_bar"
 	    android:orientation="horizontal"
 	    android:gravity="center"
