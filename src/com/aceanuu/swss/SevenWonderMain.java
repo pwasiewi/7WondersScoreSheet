@@ -60,6 +60,11 @@ public class SevenWonderMain extends SherlockActivity {
     
     private SevenWonderAdapter           pagerAdapter;
     private CustomViewPager              viewPager;
+
+    private LinearLayout                 players_edit_click;
+    private LinearLayout                 players_remove_click;
+    private LinearLayout                 results_newgame_click;
+    private LinearLayout                 results_savegame_click;
     
     private LayoutInflater               factory;
     private Context                      ctx;
@@ -71,6 +76,7 @@ public class SevenWonderMain extends SherlockActivity {
     private PlayerAdapter                nameAdapter;
     private SumAdapter                   sumAdapter;
     private ArrayList<ScoreAdapter>      scoreAdapterList;
+    
     private Map<Stages, Drawable>        stage_medals;
     
     
@@ -122,8 +128,8 @@ public class SevenWonderMain extends SherlockActivity {
         final LinearLayout results_bar      = (LinearLayout)   this.findViewById(R.id.results_bottom_bar);
         final LinearLayout bottom_container = (LinearLayout)   this.findViewById(R.id.bottom_bar);
 
-        final LinearLayout players_edit_click    = (LinearLayout) this.findViewById(R.id.edit_wonder_bottom);
-        final LinearLayout players_remove_click  = (LinearLayout) this.findViewById(R.id.remove_player_bottom);
+        players_edit_click    = (LinearLayout) players_bar.findViewById(R.id.edit_wonder_bottom);
+        players_remove_click  = (LinearLayout) players_bar.findViewById(R.id.remove_player_bottom);
 
         players_remove_click.setEnabled(true);
         players_edit_click.setEnabled(true);
@@ -214,6 +220,22 @@ public class SevenWonderMain extends SherlockActivity {
                 }
             }
         });    
+        
+        results_newgame_click.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                resetScores();
+            }
+        });   
+        
+        results_savegame_click.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //game-save logic
+            }
+        });   
     }
     
     
@@ -366,7 +388,7 @@ public class SevenWonderMain extends SherlockActivity {
 
             Stages this_stage = stages_list[position];
             
-            View temp = getLayoutInflater().inflate(R.layout.tabpanel, null);
+            View temp = factory.inflate(R.layout.tabpanel, null);
             ((ViewPager) collection).addView(temp, 0);
 
             if (this_stage == Stages.PLAYERS) 
@@ -500,7 +522,7 @@ public class SevenWonderMain extends SherlockActivity {
             RelativeLayout tempView;
             if(removeMode)
             {
-                tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.player_item_remove, null);
+                tempView = (RelativeLayout) factory.inflate(R.layout.player_item_remove, null);
                 
                 TextView wonderName = (TextView) tempView.findViewById(R.id.wonderName);
                 wonderName.setText(current_game.getPlayer(position).getWonderName());
@@ -510,7 +532,7 @@ public class SevenWonderMain extends SherlockActivity {
                 removeList.add(remove);
             }else if(editMode)
             {
-                tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.player_item_edit, null);
+                tempView = (RelativeLayout) factory.inflate(R.layout.player_item_edit, null);
 
                 Spinner wonderSpinner = (Spinner) tempView.findViewById(R.id.wonderName);
                 wonderSpinner.setSelection(current_game.getPlayer(position).getWonder().ordinal());
@@ -518,7 +540,7 @@ public class SevenWonderMain extends SherlockActivity {
                 
             }else
             {
-                tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.player_item, null);
+                tempView = (RelativeLayout) factory.inflate(R.layout.player_item, null);
                 
                 TextView wonderName = (TextView) tempView.findViewById(R.id.wonderName);
                 wonderName.setText(current_game.getPlayer(position).getWonderName());
@@ -535,11 +557,9 @@ public class SevenWonderMain extends SherlockActivity {
     private class ScoreAdapter extends BaseAdapter {
 
         Stages                                    stage;
-        private LayoutInflater                mInflater;
 
         public ScoreAdapter(Stages _stage) {
             stage             = _stage;
-            mInflater         = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -564,7 +584,7 @@ public class SevenWonderMain extends SherlockActivity {
             if (convertView == null) {
                 Log.d("getV", "convertView is null, pos " + position);
                 holder = new ViewHolder();
-                convertView = mInflater.inflate(R.layout.score_item, null);
+                convertView = factory.inflate(R.layout.score_item, null);
 
                 holder.val = (EditText) convertView.findViewById(R.id.stepScore);                
                 
@@ -692,7 +712,7 @@ public class SevenWonderMain extends SherlockActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            RelativeLayout tempView = (RelativeLayout) LayoutInflater.from(ctx).inflate(R.layout.result_item, null);
+            RelativeLayout tempView = (RelativeLayout) factory.inflate(R.layout.result_item, null);
             TextView name_box       = (TextView) tempView.findViewById(R.id.playerName);
             TextView sum_box        = (TextView) tempView.findViewById(R.id.totalScore);
             TextView position_box   = (TextView) tempView.findViewById(R.id.finishingPosition);
