@@ -20,7 +20,10 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -30,8 +33,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -809,7 +810,12 @@ public class SevenWonderMain extends SherlockActivity {
             
             name_box.setText(current_game.getPlayer(position).getName());
             sum_box.setText(current_game.getPlayer(position).getTotal() + "");
-            position_box.setText(current_game.getPlayer(position).getPlace() + "");
+            
+            Spannable suffix_span = new SpannableString(current_game.getPlayer(position).getPlace() + current_game.getPlayer(position).getPlaceSuffix());
+            suffix_span.setSpan(new ForegroundColorSpan(Color.BLUE), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//            TV.setText(WordtoSpan);
+            
+            position_box.setText(suffix_span);
             badge_box.setVisibility(View.VISIBLE);
 
             for (Stages step_won : current_game.getPlayer(position).getStageWins()) {

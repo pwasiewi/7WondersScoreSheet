@@ -14,12 +14,14 @@ public class Player {
     private ArrayList<Stages>    step_wins;
     private int                  total;
     private int                  finishing_place;
-
+    private String               finishing_place_string;
+    
     public Player(String _name, Wonders _wonder) {
         name            = _name;
         wonder          = _wonder;
         total           = 0;
         finishing_place = 0;
+        finishing_place_string = "";
         step_scores     = new TreeMap<Stages, Integer>();
         step_wins       = new ArrayList<Stages>();
     }
@@ -84,6 +86,31 @@ public class Player {
 
     public int getTotal(){
         return total;
+    }
+    
+    public String getPlaceSuffix(){
+        StringBuilder place_builder = new StringBuilder();
+//        if(finishing_place_string == "")
+//        {
+            String place_int = Integer.toString(finishing_place);
+//            place_builder.append(place_int);
+            
+            char ones_digit = place_int.charAt(place_int.length() - 1);
+            
+            if(finishing_place <10 || finishing_place > 20)
+            {
+                if(ones_digit == '1')
+                    place_builder.append("st");
+                else if(ones_digit == '2')
+                    place_builder.append("nd");
+                else if(ones_digit == '3')
+                    place_builder.append("rd");
+            }else
+                place_builder.append("th");
+            
+            finishing_place_string = place_builder.toString();
+//        }
+        return finishing_place_string;
     }
     
     public void setStepWin(Stages _stage){
