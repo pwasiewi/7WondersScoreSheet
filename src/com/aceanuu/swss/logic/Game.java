@@ -4,21 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.TreeMap;
-
-
 
 public class Game {
 
     public ArrayList<Stages>  scoring_stages;
     public ArrayList<Player>  player_list;
-
+    private boolean           has_been_saved;
     
     public Game(){
         player_list    = new ArrayList<Player>();
         scoring_stages = new ArrayList<Stages>(Arrays.asList(Stages.values()));
         scoring_stages.remove(Stages.RESULTS);
         scoring_stages.remove(Stages.PLAYERS);
+        has_been_saved = false;
     }
     
     
@@ -27,6 +25,7 @@ public class Game {
      *
      */
     public void newGame(){
+        has_been_saved = false;
         for(Player temp_player : player_list)
             temp_player.resetScores();
     }
@@ -177,6 +176,27 @@ public class Game {
     public int getPlayerStageScore(int _index, Stages _stage)
     {
         return player_list.get(_index).getStageScore(_stage);
+    }
+    
+
+    /**
+     * Saves the game results and players to the database
+     *
+     */
+    public boolean saveGame()
+    {
+        //calls to SQLite helper
+        has_been_saved = true;
+        return has_been_saved;
+    }
+
+    /**
+     * To determine if the game's results have been saved
+     *
+     * @return true if the game has been saved, else false
+     */
+    public boolean isSaved() {
+        return has_been_saved;
     }
 
 }

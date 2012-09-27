@@ -30,9 +30,13 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,7 +65,7 @@ public class SevenWonderMain extends SherlockActivity {
     private SevenWonderAdapter           pagerAdapter;
     private CustomViewPager              viewPager;
 
-    private LinearLayout                 players_edit_click;
+    private LinearLayout                 players_wonder_click;
     private LinearLayout                 players_remove_click;
     private LinearLayout                 results_newgame_click;
     private LinearLayout                 results_savegame_click;
@@ -128,11 +132,11 @@ public class SevenWonderMain extends SherlockActivity {
         final LinearLayout results_bar      = (LinearLayout)   this.findViewById(R.id.results_bottom_bar);
         final LinearLayout bottom_container = (LinearLayout)   this.findViewById(R.id.bottom_bar);
 
-        players_edit_click    = (LinearLayout) players_bar.findViewById(R.id.edit_wonder_bottom);
-        players_remove_click  = (LinearLayout) players_bar.findViewById(R.id.remove_player_bottom);
-
-        players_remove_click.setEnabled(true);
-        players_edit_click.setEnabled(true);
+        players_wonder_click     = (LinearLayout) players_bar.findViewById(R.id.players_wonder_ll);
+        players_remove_click   = (LinearLayout) players_bar.findViewById(R.id.players_remove_ll);
+        
+        results_newgame_click  = (LinearLayout) results_bar.findViewById(R.id.results_reset_ll);
+        results_savegame_click = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
         
         final TabPageIndicator tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
         tabInd.setViewPager(viewPager);
@@ -175,7 +179,7 @@ public class SevenWonderMain extends SherlockActivity {
         });
         
 
-        players_edit_click.setOnClickListener(new OnClickListener() {
+        players_wonder_click.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -207,7 +211,7 @@ public class SevenWonderMain extends SherlockActivity {
                     
                     Button remove_button = (Button) findViewById(R.id.remove_player_button);
                     remove_button.setText(R.string.remove_selected_prompt);
-                    players_edit_click.setEnabled(false);
+                    players_wonder_click.setEnabled(false);
                 }
                 else
                 {
@@ -216,7 +220,7 @@ public class SevenWonderMain extends SherlockActivity {
                     
                     Button remove_button = (Button) findViewById(R.id.remove_player_button);
                     remove_button.setText(R.string.remove_players_prompt);
-                    players_edit_click.setEnabled(true);
+                    players_wonder_click.setEnabled(true);
                 }
             }
         });    
@@ -225,7 +229,7 @@ public class SevenWonderMain extends SherlockActivity {
 
             @Override
             public void onClick(View v) {
-                resetScores();
+                beginNewGame();
             }
         });   
         
@@ -233,7 +237,7 @@ public class SevenWonderMain extends SherlockActivity {
 
             @Override
             public void onClick(View v) {
-                //game-save logic
+                current_game.saveGame();
             }
         });   
     }
@@ -269,7 +273,7 @@ public class SevenWonderMain extends SherlockActivity {
                     .setPositiveButton("Reset",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    resetScores();
+                                    beginNewGame();
                                 }
                             })
                     .setNegativeButton("Cancel",
@@ -296,12 +300,54 @@ public class SevenWonderMain extends SherlockActivity {
     }
 
     
-    public void resetScores() {
+    public void beginNewGame() {
+        finishPlayerEdits();
+        if(!current_game.isSaved())
+            resultsNotSavedPrompt();
         current_game.newGame();
         viewPager.setCurrentItem(0);
         notifyAllAdapters();
     }
 
+
+    private void finishPlayerEdits() {
+//        if(nameAdapter.editMode)
+//        {
+//            nameAdapter.commitSelectedWonders();
+//            nameAdapter.toggleEditMode();
+//        }
+//        else if(nameAdapter.removeMode)
+//        {
+//            nameAdapter.removeSelected();
+//            nameAdapter.toggleRemoveMode();
+//        } 
+    }
+
+
+    private void resultsNotSavedPrompt() {
+        Dialog temp = new AlertDialog.Builder(this)
+        .setTitle("Resutls not Saved")
+        .setMessage("Results for this game have not been saved.")
+        .setPositiveButton("Save",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        current_game.saveGame();
+                    }
+                })
+        .setNegativeButton("Don't Save",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int whichButton) {
+                    }
+                }).create();
+        
+        temp.setOnDismissListener(new OnDismissListener() {
+        
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+            }
+        });
+        temp.show();
+    }
     
     private void addPlayerPrompt() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -351,6 +397,7 @@ public class SevenWonderMain extends SherlockActivity {
 
     
     private void addPlayer(String name, Wonders wonder) {
+        finishPlayerEdits();
         current_game.addPlayer(name, wonder);
         notifyAllAdapters();
     }
@@ -453,24 +500,46 @@ public class SevenWonderMain extends SherlockActivity {
         boolean editMode;
         ArrayList<CheckBox> removeList;
         ArrayList<Spinner>  spinnerList;
+        ArrayList<Boolean>  removeSelectionList;
         
         public PlayerAdapter() {
-            removeMode = false;
-            removeList = new ArrayList<CheckBox>();
-            spinnerList= new ArrayList<Spinner>();
+            removeMode           = false;
+            editMode             = false;
+            removeList           = new ArrayList<CheckBox>();
+            spinnerList          = new ArrayList<Spinner>();
+            removeSelectionList  = new ArrayList<Boolean>();
+        }
+        
+        @Override
+        public void notifyDataSetChanged ()
+        {
+
+            if(editMode)
+            {
+                spinnerList = new ArrayList<Spinner>();
+            }
+            else if(removeMode)
+            {
+                int dif = current_game.playerCount() - removeList.size();
+                for(int i = 0; i < dif; ++i)
+                        removeSelectionList.add(false);
+            }
+            super.notifyDataSetChanged();
+            
         }
 
         public void commitSelectedWonders() {
-            for(int i = 0; i < current_game.playerCount(); ++i)
+            for(int i = 0; i < spinnerList.size(); ++i)
             {
-                current_game.getPlayer(i).setWonder(wonder_list[spinnerList.get(i).getSelectedItemPosition()]);
+                int index = spinnerList.get(i).getSelectedItemPosition();
+                current_game.getPlayer(i).setWonder(wonder_list[index]);
             }
         }
 
         public void toggleEditMode() {
             if(!editMode)
             {
-                spinnerList= new ArrayList<Spinner>();
+                spinnerList = new ArrayList<Spinner>();
             }
             editMode = !editMode;
             this.notifyDataSetChanged();
@@ -480,25 +549,31 @@ public class SevenWonderMain extends SherlockActivity {
             if(!removeMode)
             {
                 removeList = new ArrayList<CheckBox>();
+                removeSelectionList  = new ArrayList<Boolean>();
+                for(int i = 0; i < current_game.playerCount(); ++i)
+                    removeSelectionList.add(false);
             }
             removeMode = !removeMode;
             this.notifyDataSetChanged();
-            
         }
         
         public void removeSelected() {
-            ArrayList<Integer> positionsToRemove = new ArrayList<Integer>();
-            for(CheckBox thisBox : removeList)
+//            ArrayList<Integer> positionsToRemove = new ArrayList<Integer>();
+//            for(CheckBox thisBox : removeList)
+//            {
+//                if(thisBox.isChecked())
+//                {
+//                    positionsToRemove.add((Integer)thisBox.getTag());
+//                }
+//            }
+            int num_removed = 0;
+            for(int i = 0; i < removeSelectionList.size(); ++i)
             {
-                if(thisBox.isChecked())
+                if(removeSelectionList.get(i));
                 {
-                    positionsToRemove.add((Integer)thisBox.getTag());
+                    removePlayer(i-num_removed);
+                    ++num_removed;
                 }
-            }
-            
-            for(int i = 0; i < positionsToRemove.size(); ++i)
-            {
-                removePlayer(positionsToRemove.get(i)-i);
             }
         }
 
@@ -528,6 +603,14 @@ public class SevenWonderMain extends SherlockActivity {
                 wonderName.setText(current_game.getPlayer(position).getWonderName());
                 
                 CheckBox remove = (CheckBox) tempView.findViewById(R.id.removePlayerCheck);
+                remove.setChecked(removeSelectionList.get(position));
+                remove.setTag(position);
+                remove.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        removeSelectionList.set((Integer)buttonView.getTag(), isChecked);
+                    }
+                });
                 remove.setTag(position);
                 removeList.add(remove);
             }else if(editMode)
@@ -552,6 +635,7 @@ public class SevenWonderMain extends SherlockActivity {
             return tempView;
         }
     }
+    
     
 
     private class ScoreAdapter extends BaseAdapter {
