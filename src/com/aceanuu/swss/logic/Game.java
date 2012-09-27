@@ -110,9 +110,20 @@ public class Game {
             }
         });
         
+        int previous_total = -999999;
+        int previous_place = 0;
         for(int i = 0; i < sorted_player_list.size(); ++i)
         {
-            sorted_player_list.get(i).setPlace(i+1);
+            if(previous_total == sorted_player_list.get(i).getTotal())
+            {
+                sorted_player_list.get(i).setPlace(previous_place);
+            }
+            else
+            {
+                previous_place += 1;
+                previous_total = sorted_player_list.get(i).getTotal();
+                sorted_player_list.get(i).setPlace(previous_place);
+            }
         }
     }
     

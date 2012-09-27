@@ -558,23 +558,28 @@ public class SevenWonderMain extends SherlockActivity {
         }
         
         public void removeSelected() {
-//            ArrayList<Integer> positionsToRemove = new ArrayList<Integer>();
-//            for(CheckBox thisBox : removeList)
-//            {
-//                if(thisBox.isChecked())
-//                {
-//                    positionsToRemove.add((Integer)thisBox.getTag());
-//                }
-//            }
-            int num_removed = 0;
+            ArrayList<Integer> positionsToRemove = new ArrayList<Integer>();
             for(int i = 0; i < removeSelectionList.size(); ++i)
             {
-                if(removeSelectionList.get(i));
+                if(removeSelectionList.get(i))
                 {
-                    removePlayer(i-num_removed);
-                    ++num_removed;
+                    positionsToRemove.add(i);
                 }
             }
+            
+            for(int i = 0; i < positionsToRemove.size(); ++i)
+            {
+                removePlayer(positionsToRemove.get(i)-i);
+            }
+//            int num_removed = 0;
+//            for(int i = 0; i < removeSelectionList.size(); ++i)
+//            {
+//                if(removeSelectionList.get(i));
+//                {
+//                    removePlayer(i-num_removed);
+//                    ++num_removed;
+//                }
+//            }
         }
 
         @Override
