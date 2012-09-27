@@ -23,7 +23,8 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.style.ForegroundColorSpan;
+import android.text.style.SuperscriptSpan;
+import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -812,8 +813,9 @@ public class SevenWonderMain extends SherlockActivity {
             sum_box.setText(current_game.getPlayer(position).getTotal() + "");
             
             Spannable suffix_span = new SpannableString(current_game.getPlayer(position).getPlace() + current_game.getPlayer(position).getPlaceSuffix());
-            suffix_span.setSpan(new ForegroundColorSpan(Color.BLUE), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//            TV.setText(WordtoSpan);
+            int position_length = Integer.toString(current_game.getPlayer(position).getPlace()).length();
+            suffix_span.setSpan(new TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small, Color.GREEN), position_length, suffix_span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            suffix_span.setSpan(new SuperscriptSpan(), position_length, suffix_span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             
             position_box.setText(suffix_span);
             badge_box.setVisibility(View.VISIBLE);
