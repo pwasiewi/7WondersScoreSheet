@@ -85,7 +85,11 @@ public class SevenWonderMain extends SherlockActivity {
     
     private Map<Stages, Drawable>        stage_medals;
     
-    
+
+    /**
+     * Called on app creation.
+     * Initilize class constants and enum conversion arrays
+     */
     public SevenWonderMain() {
         wonder_list   = Wonders.values();
         stages_list   = Stages.values();
@@ -93,6 +97,10 @@ public class SevenWonderMain extends SherlockActivity {
     }
     
     
+    /**
+     * Called on app creation.
+     * Configures and initializes app's necessary data members
+     */
     public void initializeData() {
         current_game = new Game();
         tab_titles   = getResources().getStringArray(R.array.tabs);
@@ -112,11 +120,16 @@ public class SevenWonderMain extends SherlockActivity {
         
         TypedArray medal_images = getResources().obtainTypedArray(R.array.medals);
         stage_medals = new HashMap<Stages, Drawable>();  
+        
         for(int i = 0; i < medal_images.length(); ++i) 
             stage_medals.put(current_game.scoring_stages.get(i), medal_images.getDrawable(i));
     }
     
     
+    /**
+     * Called on app creation.
+     * Configures and initializes app's necessary UI components
+     */
     public void initializeViews() {
         getSupportActionBar().setTitle("Score Sheet");
         
@@ -127,8 +140,12 @@ public class SevenWonderMain extends SherlockActivity {
         viewPager.setAdapter(pagerAdapter);
         viewPager.setChildId(0);
     }
+
     
-    
+    /**
+     * Called on app creation.
+     * Configures and initializes app's necessary UI listeners and hooks
+     */    
     public void initializeListeners() {
         final LinearLayout players_bar      = (LinearLayout)   this.findViewById(R.id.create_bottom_bar);
         final LinearLayout results_bar      = (LinearLayout)   this.findViewById(R.id.results_bottom_bar);
@@ -244,7 +261,12 @@ public class SevenWonderMain extends SherlockActivity {
         });   
     }
     
+
     
+    /**
+     * Called on app creation.
+     * Calls all necessary initializer methods to get app into starting state
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -255,6 +277,10 @@ public class SevenWonderMain extends SherlockActivity {
     }
     
 
+    /**
+     * Called on app creation.
+     * Create menu options for primary actionbar
+     */
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add("Reset Scores").setNumericShortcut('0')
                 .setIcon(R.drawable.ic_refresh)
@@ -265,7 +291,11 @@ public class SevenWonderMain extends SherlockActivity {
         return true;
     }
 
-    
+
+    /**
+     * Called on menu item selection
+     * Create dialogs for menu item selections
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         char sc = item.getNumericShortcut();
@@ -301,7 +331,11 @@ public class SevenWonderMain extends SherlockActivity {
         return false;
     }
 
-    
+
+    /**
+     * Called when user wants to start scoring a new game
+     * Creates a new game and moves the user view to step 1
+     */
     public void beginNewGame() {
         finishPlayerEdits();
         if(!current_game.isSaved())
@@ -312,6 +346,10 @@ public class SevenWonderMain extends SherlockActivity {
     }
 
 
+    /**
+     * Called when user wants to cease modifying player configuration
+     * Exit edit states on user properties
+     */
     private void finishPlayerEdits() {
 //        if(nameAdapter.editMode)
 //        {
@@ -326,6 +364,10 @@ public class SevenWonderMain extends SherlockActivity {
     }
 
 
+    /**
+     * Called when user wants to create or otherwise destroy game without having saved results
+     * Prompts the user to either save or continue without save
+     */
     private void resultsNotSavedPrompt() {
         Dialog temp = new AlertDialog.Builder(this)
         .setTitle("Resutls not Saved")
@@ -350,7 +392,12 @@ public class SevenWonderMain extends SherlockActivity {
         });
         temp.show();
     }
+
     
+    /**
+     * Called when user wants to add another player to the game
+     * Displays the necessary prompt to capture data necessary for a new player to be made
+     */
     private void addPlayerPrompt() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final View playerPromptView = factory.inflate(R.layout.player_dialog, null);
@@ -397,20 +444,32 @@ public class SevenWonderMain extends SherlockActivity {
         alertToShow.show();
     }
 
-    
+
+    /**
+     * Called after user enters player creation data
+     * Adds player to the current game
+     */
     private void addPlayer(String name, Wonders wonder) {
         finishPlayerEdits();
         current_game.addPlayer(name, wonder);
         notifyAllAdapters();
     }
 
-    
+
+    /**
+     * Called after user selects and confirms player for removal
+     * Remove player to the current game
+     */
     private void removePlayer(int position) {
         current_game.removePlayer(position);
         notifyAllAdapters();
     }
 
-    
+
+    /**
+     * Called whenever a global state change requires app-wide update, such as new player or removal of player
+     * Notifies all listview adapters that their displays need to be regen'd
+     */
     public void notifyAllAdapters() {
         nameAdapter.notifyDataSetChanged();
         sumAdapter.notifyDataSetChanged();
@@ -419,7 +478,13 @@ public class SevenWonderMain extends SherlockActivity {
         }
     }
 
-    
+
+    /**
+     * The class that handles the view paging between steps in the app
+     * Provides access to: Step 0 - Player Creation
+     *                     Step 1 through Step N-1 - Scoring Steps
+     *                     Step N - Results Display
+     */
     public class SevenWonderAdapter extends PagerAdapter {
      
         @Override
@@ -496,6 +561,12 @@ public class SevenWonderMain extends SherlockActivity {
     }
 
     
+    /**
+     * The class that handles the display and access to manipulation of the app's players
+     * Provides access to: creation of player
+     *                     removal of player
+     *                     update to players wonder
+     */    
     private class PlayerAdapter extends BaseAdapter {
 
         boolean removeMode;
@@ -645,6 +716,11 @@ public class SevenWonderMain extends SherlockActivity {
     
     
 
+    /**
+     * The class that handles the display of individual scoring steps
+     * Provides access to: input and update of players' step scores
+     *                     via text input and buttons for inc and dec
+     */    
     private class ScoreAdapter extends BaseAdapter {
 
         Stages                                    stage;
@@ -775,7 +851,10 @@ public class SevenWonderMain extends SherlockActivity {
         }
     }
 
-    
+
+    /**
+     * Minor helper class to retain easy access to list item's UI elements
+     */  
     class ViewHolder {
         TextView name;
         EditText val;
@@ -783,7 +862,13 @@ public class SevenWonderMain extends SherlockActivity {
         Button neg;
     }
 
-    
+
+    /**
+     * The class that handles the display of the games score results
+     * Provides access to: individual step wins
+     *                     total score
+     *                     player placement
+     */  
     private class SumAdapter extends BaseAdapter {
 
         @Override
