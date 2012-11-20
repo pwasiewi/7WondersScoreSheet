@@ -240,4 +240,14 @@ public class Game {
         
     }
 
+
+    public void clearScoresCategory(STAGE debt) { 
+
+        for(Player player : player_list)
+        {
+            player.setStageScore(debt, 0);
+        }
+        
+    }
+
 }

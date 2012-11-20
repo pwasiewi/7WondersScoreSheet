@@ -66,7 +66,7 @@ import com.viewpagerindicator.TabPageIndicator;
 
 public class SevenWonderMain extends SherlockActivity {
     
-    private final int                    NUM_TABS;
+    private int                    NUM_TABS;
     private int                          dp28;
     
     private Game                         current_game;
@@ -82,45 +82,33 @@ public class SevenWonderMain extends SherlockActivity {
     private LayoutInflater               factory;
     private Context                      ctx;
 
-    private final WONDER[]               wonder_list;
-    private final STAGE[]                stages_list;
+    private WONDER[]                     wonder_list;
     private String[]                     tab_titles;
     
     private PlayerAdapter                nameAdapter;
     private SumAdapter                   sumAdapter;
     private ScienceAdapter               science_adapter;
-    private ArrayList<ScoreAdapter>      score_adapter_list;
     
     private Map<STAGE, Drawable>         stage_medals;
-
+    HashMap<STAGE, Integer>              colors;
     private Map<STAGE, ScoreAdapter>     score_adapter_map;
 
     private boolean                      expanded_science;
     private boolean                      leaders_enabled;
     private boolean                      cities_enabled;
-
+    private  ArrayList<STAGE>            stages;
     public final static int TABLET  = 0;
     public final static int COG     = 1;
     public final static int COMPASS = 2;
     public final static int WILD    = 3;
     private final static String PREF_KEY = "seven_wonders_score_sheet_preferences";
-
+    TabPageIndicator tabInd;
       String science_key;
       String leaders_key;
       String cities_key;
     
     SharedPreferences prefs;
-    
-    /**
-     * Called on app creation.
-     * Initilize class constants and enum conversion arrays
-     */
-    public SevenWonderMain() {
-        wonder_list   = WONDER.values();
-        stages_list   = STAGE.values();
-        NUM_TABS      = stages_list.length; 
-    }
-     
+         
     
     /**
      * Called on app creation.
@@ -138,6 +126,20 @@ public class SevenWonderMain extends SherlockActivity {
         leaders_enabled  = prefs.getBoolean(leaders_key, true);
         cities_enabled   = prefs.getBoolean(cities_key,  true);
         
+        colors = new HashMap<STAGE, Integer>();
+        colors.put(STAGE.PLAYERS, getResources().getColor(R.color.player));
+        colors.put(STAGE.MILITARY,getResources().getColor(R.color.military));
+        colors.put(STAGE.MONEY,getResources().getColor(R.color.money));
+        colors.put(STAGE.DEBT,getResources().getColor(R.color.money));
+        colors.put(STAGE.WONDER,getResources().getColor(R.color.wonder));
+        colors.put(STAGE.CIVILIAN,getResources().getColor(R.color.civilian));
+        colors.put(STAGE.COMMERCIAL,getResources().getColor(R.color.commercial));
+        colors.put(STAGE.SCIENCE,getResources().getColor(R.color.science));
+        colors.put(STAGE.GUILD,getResources().getColor(R.color.guild));
+        colors.put(STAGE.LEADERS,getResources().getColor(R.color.leader));
+        colors.put(STAGE.CITIES,getResources().getColor(R.color.cities)); 
+        colors.put(STAGE.RESULTS,getResources().getColor(R.color.results));
+        
         nameAdapter  = new PlayerAdapter();
         sumAdapter   = new SumAdapter();
 
@@ -147,17 +149,21 @@ public class SevenWonderMain extends SherlockActivity {
         final float scale = getResources().getDisplayMetrics().density;
         dp28 = (int) (28 * scale + 0.5f);
         
-        score_adapter_list = new ArrayList<ScoreAdapter>();
-//        score_adapter_map       = new HashMap<STAGE,ScoreAdapter>();
+        score_adapter_map       = new HashMap<STAGE,ScoreAdapter>();
         
         for (STAGE this_step : current_game.scoring_stages) 
-            score_adapter_list.add(new ScoreAdapter(this_step));
+            score_adapter_map.put(this_step, new ScoreAdapter(this_step));
+        
+
+        wonder_list   = WONDER.values();
+        
+        buildStages();
         
         //STUFF FOR EXPANDED SCIENCE
-        if(expanded_science)
-        {
+//        if(expanded_science)
+//        {
             science_adapter   = new ScienceAdapter();
-        }
+//        }
         
         TypedArray medal_images = getResources().obtainTypedArray(R.array.medals);
         stage_medals            = new HashMap<STAGE, Drawable>();  
@@ -166,7 +172,62 @@ public class SevenWonderMain extends SherlockActivity {
             stage_medals.put(current_game.scoring_stages.get(i), medal_images.getDrawable(i));
     }
     
+
+    private void buildTabColors() {
+
+        ArrayList<FrameLayout> tabs = tabInd.getTabsArray();
+        Log.e("buildTabColors", "changed expansion packs + tabs " + tabs.size());
+        for(int i = 0; i < NUM_TABS; ++i)
+        {
+            FrameLayout t = tabs.get(i);
+            STAGE stage   = stages.get(i);
+            int color     = colors.get(stage);
+            t.setBackgroundColor(color);
+            Log.e("buildTabColors", "changed expansion packs iteration  " + i) ;
+        }
+    }
     
+    private void buildStages() {
+        stages = new ArrayList<STAGE>();
+        stages.add(STAGE.PLAYERS);
+        stages.add(STAGE.MILITARY);
+        stages.add(STAGE.MONEY);
+        stages.add(STAGE.WONDER);
+        stages.add(STAGE.CIVILIAN);
+        stages.add(STAGE.COMMERCIAL);
+        stages.add(STAGE.SCIENCE);
+        stages.add(STAGE.GUILD);
+        stages.add(STAGE.RESULTS);
+
+        if(leaders_enabled)
+        {
+            int resultsindex = stages.indexOf(STAGE.RESULTS);
+            stages.add(resultsindex, STAGE.LEADERS);
+        }
+        else
+        {
+            current_game.clearScoresCategory(STAGE.LEADERS);
+        }
+        
+        if(cities_enabled)
+        {
+            int moneyindex = stages.indexOf(STAGE.MONEY);
+            stages.add(moneyindex+1, STAGE.DEBT);
+            int resultsindex = stages.indexOf(STAGE.RESULTS);
+            stages.add(resultsindex, STAGE.CITIES);
+        }
+        else
+        {
+            current_game.clearScoresCategory(STAGE.DEBT);
+            current_game.clearScoresCategory(STAGE.CITIES);
+        }
+        
+        NUM_TABS = stages.size();
+        
+        
+    }
+
+
     /**
      * Called on app creation.
      * Configures and initializes app's necessary UI components
@@ -199,7 +260,7 @@ public class SevenWonderMain extends SherlockActivity {
 //        results_savegame_click = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
         results_sort_click = (LinearLayout) results_bar.findViewById(R.id.results_sort_ll);
         
-        final TabPageIndicator tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
+        tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
         tabInd.setViewPager(viewPager);
         
         tabInd.setOnPageChangeListener(new OnPageChangeListener() {
@@ -212,7 +273,7 @@ public class SevenWonderMain extends SherlockActivity {
 
             @Override
             public void onPageSelected(int position) {
-                STAGE this_stage = stages_list[position];
+                STAGE this_stage = stages.get(position);
                 
                 if (this_stage == STAGE.RESULTS) {
                     current_game.generateResults();
@@ -238,34 +299,8 @@ public class SevenWonderMain extends SherlockActivity {
                 }
             }
         });
-        
-        ArrayList<FrameLayout> tabs = tabInd.getTabsArray();
-        Iterator<FrameLayout> tab_bg_iterator = tabs.iterator();
-        FrameLayout tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.player));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.military));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.money));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.money));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.wonder));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.civilian)); 
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.commercial));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.science));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.guild));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.leader));
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.cities)); 
-         tab = tab_bg_iterator.next();
-         tab.setBackgroundColor(getResources().getColor(R.color.results));
-        
+
+        buildTabColors();
         
         players_wonder_click.setOnClickListener(new OnClickListener() {
 
@@ -343,6 +378,8 @@ public class SevenWonderMain extends SherlockActivity {
         initializeData();
         initializeViews();
         initializeListeners();
+        
+
     }
     
 
@@ -384,8 +421,38 @@ public class SevenWonderMain extends SherlockActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) { 
 
         boolean previous_science = expanded_science;
-        
+        boolean previous_leader  = leaders_enabled;
+        boolean previous_cities  = cities_enabled;
+
         expanded_science = prefs.getBoolean(science_key, expanded_science);
+        leaders_enabled  = prefs.getBoolean(leaders_key, leaders_enabled);
+        cities_enabled   = prefs.getBoolean(cities_key,  cities_enabled);
+
+        int   current_page  = viewPager.getCurrentItem();
+        STAGE current_stage = stages.get(current_page);
+        
+//        Log.e("onActivityResult", "initial stage " + STAGE.toString(current_stage));
+//        Log.e("onActivityResult", "initial stage " + current_stage.toString());
+//        Log.e("onActivityResult", "initial page  " + current_page);
+        
+//        int money   = stages.indexOf(STAGE.MONEY);
+//        int results = stages.indexOf(STAGE.RESULTS);
+//        int guilds  = stages.indexOf(STAGE.GUILD);
+//        int leaders = stages.indexOf(STAGE.LEADERS);
+        
+        if(cities_enabled != previous_cities || leaders_enabled != previous_leader)
+        {
+
+//            Log.e("onActivityResult", "changed expansion packs");
+//            tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
+            viewPager.setAdapter(pagerAdapter);
+            pagerAdapter.notifyDataSetChanged();
+            buildStages(); 
+            notifyAllAdapters();
+            tabInd.notifyDataSetChanged();
+            notifyAllAdapters();
+            buildTabColors();
+        }
         
         if(expanded_science != previous_science)
         {
@@ -393,12 +460,35 @@ public class SevenWonderMain extends SherlockActivity {
             current_game.computePlayersScienceScores(); 
             notifyAllAdapters();
             pagerAdapter.notifyDataSetChanged();
-            pagerAdapter.instantiateItem(viewPager, 7);
+            pagerAdapter.instantiateItem(viewPager, stages.indexOf(STAGE.SCIENCE));
             viewPager.setAdapter(pagerAdapter);
-            viewPager.setCurrentItem(7);
-            return;
         } 
         
+        int index = stages.indexOf(current_stage);
+//        Log.e("onActivityResult", "index of previous current stage " + index);
+//        Log.e("onActivityResult", "previous current index " + current_page);
+        
+        if(index == -1)
+        {
+            if(current_stage == STAGE.DEBT)
+                --current_page;
+            
+            if(current_stage == STAGE.LEADERS)
+                --current_page;
+            
+            if(current_stage == STAGE.CITIES)
+            {
+                --current_page;
+                --current_page;
+            }
+            
+            if(current_stage == STAGE.CITIES && !leaders_enabled)
+                --current_page;
+            
+            index = current_page;
+        }
+//        Log.e("onActivityResult", "final current index " + index);
+        viewPager.setCurrentItem(index);
     }
 
 
@@ -500,7 +590,7 @@ public class SevenWonderMain extends SherlockActivity {
         final EditText inputName = (EditText) playerPromptView.findViewById(R.id.player_name);
         
         inputName.requestFocus();
-        alert.setTitle("Player Name");
+        alert.setTitle("Add Player");
         alert.setView(playerPromptView);
         
         spinnerWonder.setOnTouchListener(new OnTouchListener() {
@@ -570,8 +660,8 @@ public class SevenWonderMain extends SherlockActivity {
         sumAdapter.notifyDataSetChanged();
         if(science_adapter != null)
             science_adapter.notifyDataSetChanged();
-        for (ScoreAdapter temp : score_adapter_list) {
-            temp.notifyDataSetChanged();
+        for (STAGE temp : score_adapter_map.keySet()) {
+            score_adapter_map.get(temp).notifyDataSetChanged();
         }
         pagerAdapter.notifyDataSetChanged();
     }
@@ -592,13 +682,13 @@ public class SevenWonderMain extends SherlockActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return tab_titles[position % tab_titles.length].toUpperCase();
+            return STAGE.toString(stages.get(position)).toUpperCase();
         }
 
         @Override
         public Object instantiateItem(View collection, int position) {
 
-            STAGE this_stage = stages_list[position];
+            STAGE this_stage = stages.get(position);
             
             View temp = factory.inflate(R.layout.tabpanel, null);
 //            ((ViewPager) collection).removeAllViews();
@@ -646,7 +736,7 @@ public class SevenWonderMain extends SherlockActivity {
                     RelativeLayout label =  (RelativeLayout) factory.inflate(R.layout.label_players, null);
                     ((TextView)label.findViewById(R.id.rightTitle)).setText("Points");
                     labelBox.addView(label);
-                    content.setAdapter(score_adapter_list.get(position - 1));
+                    content.setAdapter(score_adapter_map.get(this_stage));
                     View tempView = content.getChildAt(0);
                     if(tempView != null)
                     {

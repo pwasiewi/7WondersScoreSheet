@@ -13,6 +13,9 @@ public enum STAGE {
             case MILITARY:
                 result = "Military";
                 break;
+            case MONEY:
+                result = "Money";
+                break;
             case WONDER:
                 result = "Wonder";
                 break;
@@ -34,6 +37,9 @@ public enum STAGE {
             case DEBT:
                 result = "Debt";
                 break;
+            case CITIES:
+                result = "Cities";
+                break;
             case RESULTS:
                 result = "Results";
                 break;
@@ -51,6 +57,9 @@ public enum STAGE {
                 result = "Wonder";
                 break;
             case MILITARY:
+                result = "Points";
+                break;
+            case MONEY:
                 result = "Points";
                 break;
             case WONDER:
@@ -72,6 +81,9 @@ public enum STAGE {
                 result = "Points";
                 break;
             case DEBT:
+                result = "Points";
+                break;
+            case CITIES:
                 result = "Points";
                 break;
             case RESULTS:
