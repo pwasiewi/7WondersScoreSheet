@@ -2,11 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <FrameLayout
+		android:id="@+id/labelContent"
+        android:clickable="false"
+	    android:layout_alignParentTop="true"
+	    android:layout_width="match_parent"
+		android:layout_height="28dp"/>
     <ListView
         android:descendantFocusability="afterDescendants"
 		android:id="@+id/pagerContent"
         android:clickable="false"
-	    android:layout_alignParentTop="true"
+        android:layout_below="@id/labelContent"
 	    android:layout_width="match_parent"
-	    android:layout_height="match_parent" />
+	    android:layout_height="match_parent"/>
 </RelativeLayout>

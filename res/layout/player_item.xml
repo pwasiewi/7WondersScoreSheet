@@ -8,11 +8,6 @@
     android:paddingLeft="10dp"
 	android:orientation="horizontal">
 		<TextView
-		    android:textColor="#fff"
-            android:shadowColor="#000000" 
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="3" 
 	        android:id="@+id/playerName"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -21,11 +16,6 @@
 		    android:text="Player_Name"/>   
 		<TextView
 			android:gravity="right"
-		    android:textColor="#fff"
-            android:shadowColor="#000000" 
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="3" 
             android:layout_alignParentRight="true"
 		    android:layout_centerVertical="true"
 			android:layout_width="wrap_content"

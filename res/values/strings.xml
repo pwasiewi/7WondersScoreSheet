@@ -9,6 +9,7 @@
     
     <string name="removePlayer">Remove Player</string>
     <string name="addPlayer">Add Player</string>
+    <string name="sortWinners">Sort Scores</string>
     
     <string name="resetScore">New Game</string>
     <string name="add_players_prompt">Add Player</string>
@@ -29,30 +30,58 @@
     
     <string name="wonder_label">Select a Wonder</string>
     
-	<string-array name="tabs">
+    
+    
+    <string name="ab_newgame">New Game</string>
+    <string name="ab_addplayer">Add Player</string>
+    <string name="ab_settings">Settings</string>
+    
+	<string-array name="base_game_tabs">
 	    <item>Players</item>
 	    <item>Military</item>
 	    <item>Money</item>
 	    <item>Wonder</item>
 	    <item>Civilian</item>
 	    <item>Commercial</item>
-	    <item>Guilds</item>
 	    <item>Science</item>
-	    <item>Leaders</item>
+	    <item>Guilds</item>
+	    <item>Results</item>
+	</string-array>
+	
+    
+    
+    
+    
+    
+    
+    
+    
+	<string-array name="tabs">
+	    <item>Players</item>
+	    <item>Military</item>
+	    <item>Money</item>
 	    <item>Debt</item>
+	    <item>Wonder</item>
+	    <item>Civilian</item>
+	    <item>Commercial</item>
+	    <item>Science</item>
+	    <item>Guilds</item>
+	    <item>Leaders</item>
+	    <item>Cities</item>
 	    <item>Results</item>
 	</string-array>
 	
 	<string-array name="medals">
 	    <item>@drawable/triangle_military</item>
 	    <item>@drawable/triangle_money</item>
+	    <item>@drawable/triangle_debt</item>
 	    <item>@drawable/triangle_wonder</item>
 	    <item>@drawable/triangle_civilian</item>
 	    <item>@drawable/triangle_commercial</item>
-	    <item>@drawable/triangle_guilds</item>
 	    <item>@drawable/triangle_science</item>
+	    <item>@drawable/triangle_guilds</item>
 	    <item>@drawable/triangle_leader</item>
-	    <item>@drawable/triangle_debt</item>
+	    <item>@drawable/triangle_cities</item>
 	</string-array>
 	
 	<string-array name="wonders">
@@ -60,14 +89,38 @@
 	    <item>Babylon</item>
 	    <item>Byzantium</item>
 	    <item>Catan</item>
-	    <item>Ephosos</item>
+	    <item>Ephesos</item>
 	    <item>Giza</item>
 	    <item>Halikarnassos</item>
-	    <item>MannekenPis</item>
+	    <item>Manneken Pis</item>
 	    <item>Olympia</item>
 	    <item>Petra</item>
 	    <item>Rhodos</item>
+	    <item>Rome</item>
 	</string-array>
+	
+	
+	
+    <string name="settings_expansions_title">Expansions</string>
+    <string name="settings_expansions_leaders_key">settings_leaders</string>
+    <string name="settings_expansions_leaders_title">Leaders</string>
+    <string name="settings_expansions_leaders_summary">Enable \'Leaders\' expansion scoring</string>
+    <string name="settings_expansions_cities_key">settings_cities</string>
+    <string name="settings_expansions_cities_title">Cities</string>
+    <string name="settings_expansions_cities_summary">Enable \'Cities\' expansion scoring</string>
+    
+    
+    <string name="settings_expanded_title">Expanded Scoring</string>
+    <string name="settings_expanded_science_summary">Automatically compute science score</string>
+    <string name="settings_expanded_science_title">Expanded Science Scoring</string>
+    <string name="settings_expanded_science_key">settings_science</string>
+    
+    
+    
+    
+    
+    
+    
 	
 	
 </resources>

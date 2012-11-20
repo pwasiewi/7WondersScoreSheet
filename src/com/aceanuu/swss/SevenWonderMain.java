@@ -2,16 +2,20 @@ package com.aceanuu.swss;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -23,13 +27,15 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
-import android.text.style.TextAppearanceSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.LayoutInflater; 
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -40,6 +46,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -49,13 +56,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aceanuu.swss.logic.Game;
-import com.aceanuu.swss.logic.Stages;
-import com.aceanuu.swss.logic.Wonders;
+import com.aceanuu.swss.logic.STAGE;
+import com.aceanuu.swss.logic.WONDER;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.viewpagerindicator.TabPageIndicator;
-
 
 public class SevenWonderMain extends SherlockActivity {
     
@@ -70,32 +77,50 @@ public class SevenWonderMain extends SherlockActivity {
     private LinearLayout                 players_wonder_click;
     private LinearLayout                 players_remove_click;
     private LinearLayout                 results_newgame_click;
-    private LinearLayout                 results_savegame_click;
+    private LinearLayout                 results_sort_click;
     
     private LayoutInflater               factory;
     private Context                      ctx;
 
-    private final Wonders[]              wonder_list;
-    private final Stages[]               stages_list;
+    private final WONDER[]               wonder_list;
+    private final STAGE[]                stages_list;
     private String[]                     tab_titles;
     
     private PlayerAdapter                nameAdapter;
     private SumAdapter                   sumAdapter;
-    private ArrayList<ScoreAdapter>      scoreAdapterList;
+    private ScienceAdapter               science_adapter;
+    private ArrayList<ScoreAdapter>      score_adapter_list;
     
-    private Map<Stages, Drawable>        stage_medals;
-    
+    private Map<STAGE, Drawable>         stage_medals;
 
+    private Map<STAGE, ScoreAdapter>     score_adapter_map;
+
+    private boolean                      expanded_science;
+    private boolean                      leaders_enabled;
+    private boolean                      cities_enabled;
+
+    public final static int TABLET  = 0;
+    public final static int COG     = 1;
+    public final static int COMPASS = 2;
+    public final static int WILD    = 3;
+    private final static String PREF_KEY = "seven_wonders_score_sheet_preferences";
+
+      String science_key;
+      String leaders_key;
+      String cities_key;
+    
+    SharedPreferences prefs;
+    
     /**
      * Called on app creation.
      * Initilize class constants and enum conversion arrays
      */
     public SevenWonderMain() {
-        wonder_list   = Wonders.values();
-        stages_list   = Stages.values();
-        NUM_TABS      = stages_list.length;
+        wonder_list   = WONDER.values();
+        stages_list   = STAGE.values();
+        NUM_TABS      = stages_list.length; 
     }
-    
+     
     
     /**
      * Called on app creation.
@@ -103,23 +128,39 @@ public class SevenWonderMain extends SherlockActivity {
      */
     public void initializeData() {
         current_game = new Game();
-        tab_titles   = getResources().getStringArray(R.array.tabs);
+        tab_titles   = getResources().getStringArray(R.array.tabs); 
+        prefs        = getSharedPreferences(PREF_KEY, MODE_PRIVATE); 
 
+        science_key = getApplicationContext().getResources().getString(R.string.settings_expanded_science_key);
+        leaders_key = getApplicationContext().getResources().getString(R.string.settings_expansions_leaders_key);
+        cities_key  = getApplicationContext().getResources().getString(R.string.settings_expansions_cities_key);
+        expanded_science = prefs.getBoolean(science_key, true);
+        leaders_enabled  = prefs.getBoolean(leaders_key, true);
+        cities_enabled   = prefs.getBoolean(cities_key,  true);
+        
         nameAdapter  = new PlayerAdapter();
         sumAdapter   = new SumAdapter();
 
         ctx          = this.getApplicationContext();
+
         
         final float scale = getResources().getDisplayMetrics().density;
         dp28 = (int) (28 * scale + 0.5f);
         
-        scoreAdapterList = new ArrayList<ScoreAdapter>();
+        score_adapter_list = new ArrayList<ScoreAdapter>();
+//        score_adapter_map       = new HashMap<STAGE,ScoreAdapter>();
         
-        for (Stages this_step : current_game.scoring_stages) 
-            scoreAdapterList.add(new ScoreAdapter(this_step));
+        for (STAGE this_step : current_game.scoring_stages) 
+            score_adapter_list.add(new ScoreAdapter(this_step));
+        
+        //STUFF FOR EXPANDED SCIENCE
+        if(expanded_science)
+        {
+            science_adapter   = new ScienceAdapter();
+        }
         
         TypedArray medal_images = getResources().obtainTypedArray(R.array.medals);
-        stage_medals = new HashMap<Stages, Drawable>();  
+        stage_medals            = new HashMap<STAGE, Drawable>();  
         
         for(int i = 0; i < medal_images.length(); ++i) 
             stage_medals.put(current_game.scoring_stages.get(i), medal_images.getDrawable(i));
@@ -155,11 +196,12 @@ public class SevenWonderMain extends SherlockActivity {
         players_remove_click   = (LinearLayout) players_bar.findViewById(R.id.players_remove_ll);
         
         results_newgame_click  = (LinearLayout) results_bar.findViewById(R.id.results_reset_ll);
-        results_savegame_click = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
+//        results_savegame_click = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
+        results_sort_click = (LinearLayout) results_bar.findViewById(R.id.results_sort_ll);
         
         final TabPageIndicator tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
         tabInd.setViewPager(viewPager);
-
+        
         tabInd.setOnPageChangeListener(new OnPageChangeListener() {
 
             @Override
@@ -170,9 +212,9 @@ public class SevenWonderMain extends SherlockActivity {
 
             @Override
             public void onPageSelected(int position) {
-                Stages this_stage = stages_list[position];
+                STAGE this_stage = stages_list[position];
                 
-                if (this_stage == Stages.RESULTS) {
+                if (this_stage == STAGE.RESULTS) {
                     current_game.generateResults();
                     viewPager.setChildId(20);
                     
@@ -183,7 +225,7 @@ public class SevenWonderMain extends SherlockActivity {
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(tabInd.getWindowToken(), 0);
                 }
-                else if (this_stage == Stages.PLAYERS) 
+                else if (this_stage == STAGE.PLAYERS) 
                 {
                     viewPager.setChildId(0);
                     bottom_container.setVisibility(View.VISIBLE);
@@ -197,7 +239,34 @@ public class SevenWonderMain extends SherlockActivity {
             }
         });
         
-
+        ArrayList<FrameLayout> tabs = tabInd.getTabsArray();
+        Iterator<FrameLayout> tab_bg_iterator = tabs.iterator();
+        FrameLayout tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.player));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.military));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.money));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.money));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.wonder));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.civilian)); 
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.commercial));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.science));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.guild));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.leader));
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.cities)); 
+         tab = tab_bg_iterator.next();
+         tab.setBackgroundColor(getResources().getColor(R.color.results));
+        
+        
         players_wonder_click.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -248,20 +317,20 @@ public class SevenWonderMain extends SherlockActivity {
 
             @Override
             public void onClick(View v) {
-                beginNewGame();
+                showResetScores();
             }
         });   
         
-        results_savegame_click.setOnClickListener(new OnClickListener() {
+        results_sort_click.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                current_game.saveGame();
+                current_game.sortByScores();
+                notifyAllAdapters();
             }
         });   
     }
     
-
     
     /**
      * Called on app creation.
@@ -282,12 +351,9 @@ public class SevenWonderMain extends SherlockActivity {
      * Create menu options for primary actionbar
      */
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("Reset Scores").setNumericShortcut('0')
-                .setIcon(R.drawable.ic_refresh)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        menu.add("Add Player").setNumericShortcut('3')
-                .setIcon(R.drawable.ic_add)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
         return true;
     }
 
@@ -298,37 +364,66 @@ public class SevenWonderMain extends SherlockActivity {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        char sc = item.getNumericShortcut();
-        if (sc == '0') {
-            Dialog temp = new AlertDialog.Builder(this)
-                    .setTitle("Reset Scores?")
-                    .setPositiveButton("Reset",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    beginNewGame();
-                                }
-                            })
-                    .setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,int whichButton) {
-                                }
-                            }).create();
-
-            temp.setOnDismissListener(new OnDismissListener() {
-
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                }
-            });
-            temp.show();
-            return true;
-        } else 
-        if (sc == '3') 
-        {
-            addPlayerPrompt();
-            return true;
+        
+        switch (item.getItemId()) {
+            case R.id.ab_newgame_item:
+                showResetScores();
+                return true;
+            case R.id.ab_addplayer_item:
+                addPlayerPrompt();
+                return true;
+            case R.id.ab_settings_item:
+                startActivityForResult(new Intent(this, Settings.class), 0); 
+                return true;
         }
         return false;
+    }
+    
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) { 
+
+        boolean previous_science = expanded_science;
+        
+        expanded_science = prefs.getBoolean(science_key, expanded_science);
+        
+        if(expanded_science != previous_science)
+        {
+            current_game.updatePlayerScienceScoring(expanded_science);
+            current_game.computePlayersScienceScores(); 
+            notifyAllAdapters();
+            pagerAdapter.notifyDataSetChanged();
+            pagerAdapter.instantiateItem(viewPager, 7);
+            viewPager.setAdapter(pagerAdapter);
+            viewPager.setCurrentItem(7);
+            return;
+        } 
+        
+    }
+
+
+    private void showResetScores() {  
+        Dialog temp = new AlertDialog.Builder(this)
+        .setTitle("Score a new game?")
+        .setPositiveButton("New Game",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        beginNewGame();
+                    }
+                })
+        .setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int whichButton) {
+                        }
+                    }).create();
+        
+        temp.setOnDismissListener(new OnDismissListener() {
+        
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+        }
+        });
+        temp.show();
     }
 
 
@@ -338,8 +433,8 @@ public class SevenWonderMain extends SherlockActivity {
      */
     public void beginNewGame() {
         finishPlayerEdits();
-        if(!current_game.isSaved())
-            resultsNotSavedPrompt();
+//        if(!current_game.isSaved())
+//            resultsNotSavedPrompt();
         current_game.newGame();
         viewPager.setCurrentItem(0);
         notifyAllAdapters();
@@ -449,9 +544,9 @@ public class SevenWonderMain extends SherlockActivity {
      * Called after user enters player creation data
      * Adds player to the current game
      */
-    private void addPlayer(String name, Wonders wonder) {
+    private void addPlayer(String name, WONDER wonder) {
         finishPlayerEdits();
-        current_game.addPlayer(name, wonder);
+        current_game.addPlayer(name, wonder, expanded_science);
         notifyAllAdapters();
     }
 
@@ -473,9 +568,12 @@ public class SevenWonderMain extends SherlockActivity {
     public void notifyAllAdapters() {
         nameAdapter.notifyDataSetChanged();
         sumAdapter.notifyDataSetChanged();
-        for (ScoreAdapter temp : scoreAdapterList) {
+        if(science_adapter != null)
+            science_adapter.notifyDataSetChanged();
+        for (ScoreAdapter temp : score_adapter_list) {
             temp.notifyDataSetChanged();
         }
+        pagerAdapter.notifyDataSetChanged();
     }
 
 
@@ -500,38 +598,66 @@ public class SevenWonderMain extends SherlockActivity {
         @Override
         public Object instantiateItem(View collection, int position) {
 
-            Stages this_stage = stages_list[position];
+            STAGE this_stage = stages_list[position];
             
             View temp = factory.inflate(R.layout.tabpanel, null);
+//            ((ViewPager) collection).removeAllViews();
             ((ViewPager) collection).addView(temp, 0);
 
-            if (this_stage == Stages.PLAYERS) 
+            ListView content  = (ListView) temp.findViewById(R.id.pagerContent);
+            FrameLayout labelBox = (FrameLayout) temp.findViewById(R.id.labelContent);
+            
+            if (this_stage == STAGE.PLAYERS) 
             {
-                ListView content = (ListView) temp.findViewById(R.id.pagerContent);
+                RelativeLayout label =  (RelativeLayout) factory.inflate(R.layout.label_players, null);
+                ((TextView)label.findViewById(R.id.rightTitle)).setText("Wonder");
+                labelBox.addView(label);
                 content.setAdapter(nameAdapter);
 
                 return temp;
             } 
-            else if (this_stage == Stages.RESULTS) 
+            else
             {
-                ListView content = (ListView) temp.findViewById(R.id.pagerContent);
-                content.setAdapter(sumAdapter);
-                return temp;
-            }
-            else 
-            {
-                ListView content = (ListView) temp.findViewById(R.id.pagerContent);
-                content.setAdapter(scoreAdapterList.get(position - 1));
-                View tempView = content.getChildAt(0);
-                if(tempView != null)
+                if(nameAdapter.editMode)
                 {
-                    tempView = tempView.findViewById(R.id.stepScore);
+                    nameAdapter.commitSelectedWonders();
+                    nameAdapter.toggleEditMode();
+                    Button edit_button = (Button) findViewById(R.id.edit_wonder_button);
+                    edit_button.setText(R.string.change_wonder_prompt);
+                    players_remove_click.setEnabled(true);
+                }
+                
+                if (this_stage == STAGE.RESULTS) 
+                {
+                    RelativeLayout label =  (RelativeLayout) factory.inflate(R.layout.label_results, null);
+                    labelBox.addView(label);
+                    content.setAdapter(sumAdapter);
+                    return temp;
+                }
+                if (this_stage == STAGE.SCIENCE && expanded_science) 
+                {
+                    RelativeLayout label =  (RelativeLayout) factory.inflate(R.layout.label_science, null);
+                    labelBox.addView(label);
+                    content.setAdapter(science_adapter);
+                    return temp;
+                }
+                else 
+                {
+                    RelativeLayout label =  (RelativeLayout) factory.inflate(R.layout.label_players, null);
+                    ((TextView)label.findViewById(R.id.rightTitle)).setText("Points");
+                    labelBox.addView(label);
+                    content.setAdapter(score_adapter_list.get(position - 1));
+                    View tempView = content.getChildAt(0);
                     if(tempView != null)
                     {
-                        tempView.requestFocus();
+                        tempView = tempView.findViewById(R.id.stepScore);
+                        if(tempView != null)
+                        {
+                            tempView.requestFocus();
+                        }
                     }
+                    return temp;
                 }
-                return temp;
             }
         }
 
@@ -644,15 +770,6 @@ public class SevenWonderMain extends SherlockActivity {
             {
                 removePlayer(positionsToRemove.get(i)-i);
             }
-//            int num_removed = 0;
-//            for(int i = 0; i < removeSelectionList.size(); ++i)
-//            {
-//                if(removeSelectionList.get(i));
-//                {
-//                    removePlayer(i-num_removed);
-//                    ++num_removed;
-//                }
-//            }
         }
 
         @Override
@@ -715,7 +832,6 @@ public class SevenWonderMain extends SherlockActivity {
     }
     
     
-
     /**
      * The class that handles the display of individual scoring steps
      * Provides access to: input and update of players' step scores
@@ -723,9 +839,9 @@ public class SevenWonderMain extends SherlockActivity {
      */    
     private class ScoreAdapter extends BaseAdapter {
 
-        Stages                                    stage;
+        STAGE                                    stage;
 
-        public ScoreAdapter(Stages _stage) {
+        public ScoreAdapter(STAGE _stage) {
             stage             = _stage;
         }
 
@@ -765,6 +881,7 @@ public class SevenWonderMain extends SherlockActivity {
             } else {
                 Log.w("getV", "convertView is not null, pos " + position);
                 holder = (ViewHolder) convertView.getTag();
+                holder.name.setText(current_game.getPlayer(position).getName()); 
             }
                         
             final int f_position = position;
@@ -839,19 +956,214 @@ public class SevenWonderMain extends SherlockActivity {
                     }
                     current_game.setPlayerStageScore(f_position, stage, value);
                 }      
-                
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
             });
             
             return convertView;
         }
     }
 
+    
+    /**
+     * The class that handles the display of individual scoring steps
+     * Provides access to: input and update of players' step scores
+     *                     via text input and buttons for inc and dec
+     */    
+    private class ScienceAdapter extends BaseAdapter {
 
+        STAGE                   stage;
+
+        public ScienceAdapter() {
+            stage              = STAGE.SCIENCE;
+        }
+
+        @Override
+        public int getCount() {
+            return current_game.playerCount();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return current_game.getPlayer(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+        
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            final ScienceHolder science;
+            if (convertView == null) {
+                
+                Log.d("SCIENCE", "convertView is null, SCIENCE pos " + position);
+                convertView = factory.inflate(R.layout.science_item, null);
+                science = new ScienceHolder((EditText) convertView.findViewById(R.id.numCog),
+                                            (EditText) convertView.findViewById(R.id.numCompass),
+                                            (EditText) convertView.findViewById(R.id.numTablet),
+                                            (EditText) convertView.findViewById(R.id.numWild));
+      
+                science.name    = (TextView) convertView.findViewById(R.id.playerName);
+                science.name.setText(current_game.getPlayer(position).getName()); 
+               
+                science.pos = (Button) convertView.findViewById(R.id.pos);
+                science.neg = (Button) convertView.findViewById(R.id.neg);
+                
+                convertView.setTag(science);
+            } else {
+                Log.w("getV", "convertView is not null, pos " + position);
+                science = (ScienceHolder) convertView.getTag();
+                science.name.setText(current_game.getPlayer(position).getName()); 
+                Log.w("getV", "1111111111111111111111 JUST RETURNING WUT " + position);
+//                return convertView;
+            }
+                        
+            final int f_position = position;
+            
+
+            science.pos.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    int position = current_game.getPlayer(f_position).getSelectedScienceIndex();
+                    TextView science_category = science.compass;
+                    switch(position)
+                    {
+                        case COMPASS:
+                            science_category = science.compass;
+                            break;
+                        case COG:
+                            science_category = science.cog;
+                            break;
+                        case TABLET:
+                            science_category = science.tablet;
+                            break;
+                        case WILD:
+                            science_category = science.wild;
+                            break;
+                    }
+                    try {
+                        int scoreval = Integer.parseInt(science_category.getText().toString());
+                        scoreval++;
+                        science_category.setText(scoreval + "");
+                    }catch(Exception e)
+                    {
+                        science_category.setText("1");
+                    }
+                }
+            });
+
+           
+            science.neg.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    int position = current_game.getPlayer(f_position).getSelectedScienceIndex();
+                    TextView science_category = science.compass;
+                    switch(position)
+                    {
+                        case COMPASS:
+                            science_category = science.compass;
+                            break;
+                        case COG:
+                            science_category = science.cog;
+                            break;
+                        case TABLET:
+                            science_category = science.tablet;
+                            break;
+                        case WILD:
+                            science_category = science.wild;
+                            break;
+                    }
+                    try {
+                        int scoreval = Integer.parseInt(science_category.getText().toString());
+                        scoreval--;
+                        science_category.setText(scoreval + "");
+                    }catch(Exception e)
+                    {
+                        science_category.setText("");
+                    }
+                }
+                
+            });
+
+            if(current_game.getPlayer(position).getScienceScore(COMPASS) != 0)
+                science.compass.setText(current_game.getPlayer(position).getScienceScore(COMPASS) + "");
+            if(current_game.getPlayer(position).getScienceScore(WILD) != 0)
+                science.wild.setText(current_game.getPlayer(position).getScienceScore(WILD) + "");
+            if(current_game.getPlayer(position).getScienceScore(COG) != 0)
+                science.cog.setText(current_game.getPlayer(position).getScienceScore(COG) + "");
+            if(current_game.getPlayer(position).getScienceScore(TABLET) != 0)
+                science.tablet.setText(current_game.getPlayer(position).getScienceScore(TABLET) + "");
+
+            science.cog.addTextChangedListener(getScienceWatcher(science.cog, position, COG));
+            science.compass.addTextChangedListener(getScienceWatcher(science.compass, position, COMPASS));
+            science.tablet.addTextChangedListener(getScienceWatcher(science.tablet, position, TABLET));
+            science.wild.addTextChangedListener(getScienceWatcher(science.wild, position, WILD));
+
+            science.cog.setOnFocusChangeListener(getScienceListner(science.cog, position, COG));
+            science.compass.setOnFocusChangeListener(getScienceListner(science.compass, position, COMPASS));
+            science.tablet.setOnFocusChangeListener(getScienceListner(science.tablet, position, TABLET));
+            science.wild.setOnFocusChangeListener(getScienceListner(science.wild, position, WILD));
+            
+            return convertView;
+        }
+        
+        public TextWatcher getScienceWatcher(final EditText box, final int position, final int CATEGORY)
+        {
+            return new TextWatcher() {
+                
+                public void afterTextChanged(Editable s) {
+                    int value;
+                    if(box.getText().toString().equals("") || box.getText().toString().equals("-"))
+                    {
+                        value = 0;
+                    }
+                    else
+                    if(box.getText().toString().equals("0") )
+                    {
+                        value = 0;
+                        box.setText("");
+                    }
+                    else 
+                    {  
+                        try 
+                        {
+                            value = Integer.parseInt(box.getText().toString());
+                        }
+                        catch(Exception e)
+                        {
+                            box.setText("");
+                            value = 0;
+                        }
+                    }
+                    current_game.getPlayer(position).setScienceScore(value, CATEGORY);
+                }      
+                
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            };
+        }
+      
+
+        public OnFocusChangeListener getScienceListner(final EditText box, final int position, final int CATEGORY)
+        {
+            return new OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if(hasFocus)
+                    {
+                        current_game.getPlayer(position).setSelectedScienceIndex(CATEGORY);
+                    }
+                }
+            };
+        }
+    }
+
+    
     /**
      * Minor helper class to retain easy access to list item's UI elements
      */  
@@ -860,6 +1172,24 @@ public class SevenWonderMain extends SherlockActivity {
         EditText val;
         Button pos;
         Button neg;
+    } 
+    
+    
+    class ScienceHolder {
+        TextView name;
+        EditText cog;
+        EditText compass;
+        EditText tablet;
+        EditText wild;
+        Button pos;
+        Button neg;
+        
+        public ScienceHolder(EditText _cog, EditText _compass, EditText _tablet, EditText _wild) {
+            cog      = _cog;
+            compass  = _compass;
+            tablet   = _tablet;
+            wild     = _wild;
+            }
     }
 
 
@@ -899,26 +1229,32 @@ public class SevenWonderMain extends SherlockActivity {
             
             Spannable suffix_span = new SpannableString(current_game.getPlayer(position).getPlace() + current_game.getPlayer(position).getPlaceSuffix());
             int position_length = Integer.toString(current_game.getPlayer(position).getPlace()).length();
-            suffix_span.setSpan(new TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small, Color.GREEN), position_length, suffix_span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             suffix_span.setSpan(new SuperscriptSpan(), position_length, suffix_span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            
+            suffix_span.setSpan(new RelativeSizeSpan(.35f), position_length, suffix_span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             position_box.setText(suffix_span);
             badge_box.setVisibility(View.VISIBLE);
 
-            for (Stages step_won : current_game.getPlayer(position).getStageWins()) {
+            for (STAGE step_won : current_game.getPlayer(position).getStageWins()) 
+            {
                 if(stage_medals.containsKey(step_won))
                 {
                     ImageView tempIV     = new ImageView(ctx);
-                    Bitmap bmp           =  ((BitmapDrawable)stage_medals.get(step_won)).getBitmap();
+                    Bitmap bmp           = ((BitmapDrawable)stage_medals.get(step_won)).getBitmap();
                     Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp, dp28, dp28, true);
                     tempIV.setImageBitmap(resizedbitmap);
                     badge_box.addView(tempIV);
                 }
             }
 
-            if (current_game.getPlayer(position).getPlace() == 1) {
-                sum_box.setTextColor(Color.GREEN);
-                position_box.setTextColor(Color.GREEN);
+            if (current_game.getPlayer(position).getPlace() == 1) 
+            {
+                suffix_span.setSpan(new ForegroundColorSpan(Color.WHITE), position_length, suffix_span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+                sum_box.setTextColor(Color.parseColor("#ffffff"));
+                sum_box.setTypeface(null, Typeface.BOLD);
+                name_box.setTypeface(null, Typeface.BOLD);
+                position_box.setTextColor(Color.parseColor("#ffffff"));
+                tempView.setBackgroundColor(Color.parseColor("#33b5e5"));
             }
 
             return tempView;

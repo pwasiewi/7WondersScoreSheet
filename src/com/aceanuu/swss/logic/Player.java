@@ -1,6 +1,7 @@
 package com.aceanuu.swss.logic;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -8,46 +9,85 @@ import java.util.TreeMap;
 
 public class Player {
 
-    private String               name;
-    private Wonders              wonder;
-    private Map<Stages, Integer> step_scores;
-    private ArrayList<Stages>    step_wins;
-    private int                  total;
-    private int                  finishing_place;
+    public final static int TABLET  = 0;
+    public final static int COG     = 1;
+    public final static int COMPASS = 2;
+    public final static int WILD    = 3;
     
-    public Player(String _name, Wonders _wonder) {
-        name            = _name;
-        wonder          = _wonder;
-        total           = 0;
-        finishing_place = 0;
-        step_scores     = new TreeMap<Stages, Integer>();
-        step_wins       = new ArrayList<Stages>();
+    private String              name;
+    private WONDER              wonder;
+    private Map<STAGE, Integer> step_scores;
+    private ArrayList<STAGE>    step_wins;
+    private int                 total;
+    private int                 finishing_place;
+    public  int[]               science;
+    public  int                 selected_science_index;
+    public  boolean             expanded_science;
+    
+    public Player(String _name, WONDER _wonder, boolean _expanded_science) {
+        name                      = _name;
+        wonder                    = _wonder;
+        total                     = 0;
+        finishing_place           = 0;
+        step_scores               = new TreeMap<STAGE, Integer>();
+        step_wins                 = new ArrayList<STAGE>();
+        science                   = new int[] {0,0,0,0};
+        selected_science_index    = 0;
+        step_scores.put(STAGE.SCIENCE, 0); 
+        expanded_science          = _expanded_science;
     }
 
     public void resetScores() {
-        step_wins       = new ArrayList<Stages>();
-        step_scores     = new TreeMap<Stages, Integer>();
-        total           = 0;
-        finishing_place = 0;
+        step_wins                 = new ArrayList<STAGE>();
+        step_scores               = new TreeMap<STAGE, Integer>();
+        step_scores.put(STAGE.SCIENCE, 0); 
+        total                     = 0;
+        finishing_place           = 0;
+        selected_science_index    = 0;
+        science[0]                = 0;
+        science[1]                = 0;
+        science[2]                = 0;
+        science[3]                = 0;
+    }
+    
+    
+    public void setExpandedScience(boolean t)
+    {
+        expanded_science = t;
     }
     
     public void clearSums() {
-        step_wins       = new ArrayList<Stages>();
-        total           = 0;
-        finishing_place = 0;
+        step_wins                 = new ArrayList<STAGE>();
+        total                     = 0;
+        finishing_place           = 0;
     } 
+
+    public void setScienceScore(int value, int CATEGORY) {
+        science[CATEGORY]  = value;
+    }
     
+    public int getScienceScore(int CATEGORY) {
+        return science[CATEGORY];
+    }
     
-    public Wonders getWonder() {
+    public WONDER getWonder() {
         return wonder;
     }
-    public String getWonderName() {
-        return wonder.name();
-    }
-    public void setWonder(Wonders _wonder) {
-        wonder = _wonder;
+    
+    public void setSelectedScienceIndex(int INDEX) {
+        selected_science_index = INDEX;
     }
     
+    public int getSelectedScienceIndex() {
+        return selected_science_index;
+    }
+    
+    public String getWonderName() {
+        return WONDER.toString(wonder);
+    }
+    public void setWonder(WONDER _wonder) {
+        wonder = _wonder;
+    }
     
     public String getName() {
         return name;
@@ -55,8 +95,6 @@ public class Player {
     public void setName(String _name) {
         name = _name;
     }
-
-       
     
     @Override
     public String toString()
@@ -64,11 +102,13 @@ public class Player {
         return name + " as " + wonder.name();
     }
 
-    public void setStageScore(Stages _stage, int _score) {
+    public void setStageScore(STAGE _stage, int _score) {
         step_scores.put(_stage, _score);
     }
     
-    public int getStageScore(Stages _stage) {
+    public int getStageScore(STAGE _stage) {
+        if(_stage == STAGE.SCIENCE && expanded_science)
+            getSciencePoints();
         if(step_scores.get(_stage) != null)
             return step_scores.get(_stage);
         else
@@ -77,8 +117,8 @@ public class Player {
     
     public void computeTotal(){
         total = 0;
-        for(Stages temp_key : step_scores.keySet()) {
-            total += step_scores.get(temp_key);
+        for(STAGE temp_key : step_scores.keySet()) {
+            total += getStageScore(temp_key);
         }
     }
 
@@ -104,10 +144,9 @@ public class Player {
             return "th";
     }
     
-    public void setStepWin(Stages _stage){
+    public void setStepWin(STAGE _stage){
         step_wins.add(_stage);
     }
-
 
     public void setPlace(int i) {
         finishing_place = i;
@@ -117,7 +156,61 @@ public class Player {
         return finishing_place;
     }
 
-    public ArrayList<Stages> getStageWins() {
+    public ArrayList<STAGE> getStageWins() {
         return step_wins;
     }
+
+    public int getSciencePointsHelper(int[] outcome){
+        int sciencePoints = 0;
+        int leastSymbol = Math.min(Math.min(outcome[COG], outcome[COMPASS]), outcome[TABLET]);
+        
+        sciencePoints += leastSymbol*7;
+        sciencePoints += outcome[COG]*outcome[COG];
+        sciencePoints += outcome[COMPASS]*outcome[COMPASS];
+        sciencePoints += outcome[TABLET]*outcome[TABLET];
+        return sciencePoints;
+    }
+    
+    public int getSciencePoints() {
+        
+        int tablet  = science[TABLET];
+        int cog     = science[COG];
+        int compass = science[COMPASS];
+        int wilds   = science[WILD];
+        
+        LinkedList<int[]> scores = new LinkedList<int[]>();
+        
+        //load up the list with initial value
+        scores.add(new int[] {tablet, cog, compass});
+        
+        for(int wild_lvl = 0; wild_lvl < wilds; ++wild_lvl)
+        {
+            int num_to_pop = (int) Math.pow(3, wild_lvl);
+            
+            for(int popped = 0; popped < num_to_pop; ++popped)
+            {
+                int[] values   = scores.remove();
+                
+                tablet         = values[TABLET];
+                cog            = values[COG];
+                compass        = values[COMPASS];
+                
+                scores.add(new int[] {tablet + 1, cog, compass});
+                scores.add(new int[] {tablet, cog + 1, compass});
+                scores.add(new int[] {tablet, cog, compass + 1});
+            }
+        }
+        
+        int maxValue = 0;
+        for(int[] v : scores)
+        {
+            int val = getSciencePointsHelper(v);
+            if(val > maxValue)
+                maxValue = val;
+        }
+        
+        step_scores.put(STAGE.SCIENCE, maxValue);
+        return maxValue;
+    }
+
 }

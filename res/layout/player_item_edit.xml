@@ -8,11 +8,6 @@
 	android:minHeight="46dp"
 	android:orientation="horizontal">
 		<TextView
-		    android:textColor="#fff"
-            android:shadowColor="#000000" 
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="3" 
 		    android:layout_centerVertical="true"
 		    android:layout_alignParentLeft="true"
 	        android:id="@+id/playerName"
@@ -21,11 +16,6 @@
 		    android:text="Player_Name"/>   
 		<Spinner
 			android:gravity="right"
-		    android:textColor="#fff"
-            android:shadowColor="#000000" 
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="3" 
             android:layout_alignParentRight="true"
 		    android:layout_centerVertical="true"
 	        android:id="@+id/wonderName"

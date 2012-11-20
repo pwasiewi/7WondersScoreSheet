@@ -8,11 +8,6 @@
 	android:layout_height="46dp"
 	android:orientation="horizontal">	
 		<TextView
-		    android:textColor="#fff"
-            android:shadowColor="#000000" 
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="3" 
 		    android:layout_centerVertical="true"
 		    android:layout_alignParentLeft="true"
 	        android:id="@+id/playerName"
@@ -32,15 +27,9 @@
 		        android:id="@+id/neg"
 				android:layout_width="46dp"
 				android:layout_height="46dp"
-			    android:text="-">    
-			</Button>
+			    android:text="-"/>    
 			<EditText
 			    android:selectAllOnFocus="true"
-			    android:textColor="#fff"
-	            android:shadowColor="#000000" 
-	            android:shadowRadius="2"
-	            android:shadowDx="1"
-	            android:shadowDy="3" 
 			    android:layout_toLeftOf="@+id/pos"
 			    android:layout_centerVertical="true"
 		        android:id="@+id/stepScore"
@@ -50,15 +39,13 @@
 				android:layout_height="wrap_content"
 			    android:gravity="center"
 			    android:hint="0"
-			    android:text="">    
-			</EditText>
+			    android:text=""/>    
 			<Button
 			    android:layout_alignParentRight="true"
 			    android:layout_centerVertical="true"
 		        android:id="@+id/pos"
 				android:layout_width="46dp"
 				android:layout_height="46dp"
-			    android:text="+">    
-			</Button>
+			    android:text="+"/>    
 		</RelativeLayout>
 </RelativeLayout>	

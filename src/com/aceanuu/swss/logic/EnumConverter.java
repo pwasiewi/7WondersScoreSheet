@@ -1,49 +1,49 @@
-package com.aceanuu.swss.logic;
-
-
-public class EnumConverter {
-
-    public static String stages(Stages _enum) {
-        String result = "";
-        
-        switch (_enum) {
-            case PLAYERS:
-                result = "Players";
-                break;
-            case MILITARY:
-                result = "Military";
-                break;
-            case WONDER:
-                result = "Wonder";
-                break;
-            case CIVILIAN:
-                result = "Civilian";
-                break;
-            case COMMERCIAL:
-                result = "Commercial";
-                break;
-            case GUILD:
-                result = "Guilds";
-                break;
-            case SCIENCE:
-                result = "Science";
-                break;
-            case LEADERS:
-                result = "Leaders";
-                break;
-            case DEBT:
-                result = "Debt";
-                break;
-            case RESULTS:
-                result = "Results";
-                break;
-        }
-        if(result == "")
-            throw new IllegalArgumentException();
-        
-        return result;
-    }
+//package com.aceanuu.swss.logic;
 //
+//
+//public class EnumConverter {
+//
+//    public static String stages(STAGE _enum) {
+//        String result = "";
+//        
+//        switch (_enum) {
+//            case PLAYERS:
+//                result = "Players";
+//                break;
+//            case MILITARY:
+//                result = "Military";
+//                break;
+//            case WONDER:
+//                result = "Wonder";
+//                break;
+//            case CIVILIAN:
+//                result = "Civilian";
+//                break;
+//            case COMMERCIAL:
+//                result = "Commercial";
+//                break;
+//            case GUILD:
+//                result = "Guilds";
+//                break;
+//            case SCIENCE:
+//                result = "Science";
+//                break;
+//            case LEADERS:
+//                result = "Leaders";
+//                break;
+//            case DEBT:
+//                result = "Debt";
+//                break;
+//            case RESULTS:
+//                result = "Results";
+//                break;
+//        }
+//        if(result == "")
+//            throw new IllegalArgumentException();
+//        
+//        return result;
+//    }
+////
 //    public static String wonders(Wonders _enum) {
 //        String result = ""; 
 //        switch (_enum) {
@@ -86,4 +86,4 @@ public class EnumConverter {
 //        
 //        return result;
 //    }
-}
+//}

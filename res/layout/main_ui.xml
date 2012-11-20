@@ -1,140 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:id="@+id/main">
-    
     <com.viewpagerindicator.TabPageIndicator
         android:id="@+id/indicatorzulu"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_alignParentTop="true"
-        />
-    
+        android:layout_alignParentTop="true"/>
+    <LinearLayout
+		android:background="@drawable/abs__upsidedown_ab_solid_light_holo"
+	    android:visibility="visible"
+	    android:layout_alignParentBottom="true"
+	    android:id="@+id/bottom_bar"
+	    android:orientation="horizontal"
+	    android:gravity="center"
+	    android:layout_width="match_parent"
+	    android:layout_height="45dp" >
 	
     <LinearLayout
-	android:background="@drawable/ab_solid_dark_holo"
-    android:visibility="visible"
-    android:layout_alignParentBottom="true"
-    android:id="@+id/bottom_bar"
-    android:orientation="horizontal"
-    android:gravity="center"
-    android:layout_width="match_parent"
-    android:layout_height="45dp" >
-	
-	    <LinearLayout
 	    android:visibility="visible"
 	    android:id="@+id/create_bottom_bar"
 	    android:orientation="horizontal"
 	    android:gravity="center"
 	    android:layout_width="match_parent"
 	    android:layout_height="45dp" >
-			    
-			<LinearLayout
-			    android:layout_weight="1"
-			    android:clickable="true"
-			    android:id="@+id/players_wonder_ll"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:layout_gravity="center"
-			    android:addStatesFromChildren="true"
-			    android:gravity="center"
-			    android:focusable="true"
-			    android:paddingLeft="4dip"
-			    android:paddingRight="4dip"
-			    style="?attr/actionButtonStyle">
-			    
-			    <ImageButton 
-			        		 android:id="@+id/edit_wonder_imagebutton"
-			                 android:layout_width="wrap_content"
-			                 android:layout_height="wrap_content"
-			                 android:layout_gravity="center"
-			                 android:layout_marginTop="4dip"
-			                 android:layout_marginBottom="4dip"
-			                 android:layout_marginLeft="4dip"
-			                 android:layout_marginRight="4dip"
-			                 android:scaleType="fitCenter"
-			                 android:adjustViewBounds="true"
-			                 android:src="@drawable/ic_menu_manage"
-			            	 android:background="@null"
-			            	 android:clickable="false"
-			                 android:focusable="false" />
-			    
-			    <Button
-			            android:id="@+id/edit_wonder_button"
-			            android:layout_width="wrap_content"
-			            android:layout_height="wrap_content"
-			            android:layout_gravity="center"
-			            android:textAppearance="?attr/actionMenuTextAppearance"
-			            style="?attr/buttonStyleSmall"
-			            android:textColor="?attr/actionMenuTextColor"
-			            android:singleLine="true"
-			            android:ellipsize="none"
-			            android:background="@null"
-			            android:paddingTop="4dip"
-			            android:paddingBottom="4dip"
-			            android:paddingLeft="4dip"
-			            android:paddingRight="4dip"
-			            android:focusable="false"
-			            android:clickable="false"
-			            android:text="@string/change_wonder_prompt"/>
-			</LinearLayout>
-			    
-			<LinearLayout
-			    android:clickable="true"
-			    android:layout_weight="1"
-			    android:id="@+id/players_remove_ll"
-			    xmlns:android="http://schemas.android.com/apk/res/android"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:layout_gravity="center"
-			    android:addStatesFromChildren="true"
-			    android:gravity="center"
-			    android:focusable="true"
-			    android:paddingLeft="4dip"
-			    android:paddingRight="4dip"
-			    style="?attr/actionButtonStyle">
-			    <ImageButton android:id="@+id/remove_player_imagebutton"
-			                 android:layout_width="wrap_content"
-			                 android:layout_height="wrap_content"
-			                 android:layout_gravity="center"
-			                 android:layout_marginTop="4dip"
-			                 android:layout_marginBottom="4dip"
-			                 android:layout_marginLeft="4dip"
-			                 android:layout_marginRight="4dip"
-			                 android:scaleType="fitCenter"
-			                 android:adjustViewBounds="true"
-			                 android:background="@null"
-			    android:clickable="false"
-			                 android:src="@drawable/ic_menu_delete"
-			                 android:focusable="false" />
-			    <Button android:id="@+id/remove_player_button"
-			            android:layout_width="wrap_content"
-			            android:layout_height="wrap_content"
-			            android:layout_gravity="center"
-			            android:textAppearance="?attr/actionMenuTextAppearance"
-			            style="?attr/buttonStyleSmall"
-			            android:textColor="?attr/actionMenuTextColor"
-			            android:singleLine="true"
-			            android:ellipsize="none"
-			            android:background="@null"
-			            android:paddingTop="4dip"
-			            android:paddingBottom="4dip"
-			            android:paddingLeft="4dip"
-			            android:paddingRight="4dip"
-			            android:focusable="false"
-			            android:clickable="false"
-			            android:text="@string/remove_players_prompt" />
-			</LinearLayout>
-			
-			
+		<LinearLayout
+		    android:layout_weight="1"
+		    android:clickable="true"
+		    android:id="@+id/players_wonder_ll"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center"
+		    android:addStatesFromChildren="true"
+		    android:gravity="center"
+		    android:focusable="true"
+		    android:paddingLeft="4dip"
+		    android:paddingRight="4dip"
+		    style="?attr/actionButtonStyle">
+		    <ImageButton 
+        		 android:id="@+id/edit_wonder_imagebutton"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="center"
+                 android:layout_marginTop="4dip"
+                 android:layout_marginBottom="4dip"
+                 android:layout_marginLeft="4dip"
+                 android:layout_marginRight="4dip"
+                 android:scaleType="fitCenter"
+                 android:adjustViewBounds="true"
+                 android:src="@drawable/content_edit"
+            	 android:background="@null"
+            	 android:clickable="false"
+                 android:focusable="false" /> 
+		    <Button
+	            android:id="@+id/edit_wonder_button"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center"
+	            android:textAppearance="?attr/actionMenuTextAppearance"
+	            style="?attr/buttonStyleSmall"
+	            android:textColor="?attr/actionMenuTextColor"
+	            android:singleLine="true"
+	            android:ellipsize="none"
+	            android:background="@null"
+	            android:paddingTop="4dip"
+	            android:paddingBottom="4dip"
+	            android:paddingLeft="4dip"
+	            android:paddingRight="4dip"
+	            android:focusable="false"
+	            android:clickable="false"
+	            android:text="@string/change_wonder_prompt"/>
 		</LinearLayout>
-		
-	    <LinearLayout
-			    android:background="@drawable/ab_solid_dark_holo"
-	        android:visibility="gone"
+		    
+		<LinearLayout
+		    android:clickable="true"
+		    android:layout_weight="1"
+		    android:id="@+id/players_remove_ll"
+		    xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center"
+		    android:addStatesFromChildren="true"
+		    android:gravity="center"
+		    android:focusable="true"
+		    android:paddingLeft="4dip"
+		    android:paddingRight="4dip"
+		    style="?attr/actionButtonStyle">
+		    <ImageButton android:id="@+id/remove_player_imagebutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dip"
+                android:layout_marginBottom="4dip"
+                android:layout_marginLeft="4dip"
+                android:layout_marginRight="4dip"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:background="@null"
+		    	android:clickable="false"
+                android:src="@drawable/content_discard"
+                android:focusable="false" />
+		    <Button android:id="@+id/remove_player_button"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center"
+	            android:textAppearance="?attr/actionMenuTextAppearance"
+	            style="?attr/buttonStyleSmall"
+	            android:textColor="?attr/actionMenuTextColor"
+	            android:singleLine="true"
+	            android:ellipsize="none"
+	            android:background="@null"
+	            android:paddingTop="4dip"
+	            android:paddingBottom="4dip"
+	            android:paddingLeft="4dip"
+	            android:paddingRight="4dip"
+	            android:focusable="false"
+	            android:clickable="false"
+	            android:text="@string/remove_players_prompt" />
+		</LinearLayout>
+	</LinearLayout> 
+    <LinearLayout
+		android:background="@drawable/abs__upsidedown_ab_solid_light_holo"
+        android:visibility="gone"
 	    android:layout_alignParentBottom="true"
 	    android:id="@+id/results_bottom_bar"
 	    android:orientation="horizontal"
@@ -144,7 +133,7 @@
 			<LinearLayout
 			    android:layout_weight="1"
 			    android:clickable="true"
-			    android:id="@+id/results_save_ll"
+			    android:id="@+id/results_sort_ll"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
 			    android:layout_gravity="center"
@@ -155,37 +144,37 @@
 			    android:paddingRight="4dip"
 			    style="?attr/actionButtonStyle">
 			    <ImageButton 
-			                 android:layout_width="wrap_content"
-			                 android:layout_height="wrap_content"
-			                 android:layout_gravity="center"
-			                 android:layout_marginTop="4dip"
-			                 android:layout_marginBottom="4dip"
-			                 android:layout_marginLeft="4dip"
-			                 android:layout_marginRight="4dip"
-			                 android:scaleType="fitCenter"
-			                 android:adjustViewBounds="true"
-			                 android:src="@drawable/ic_menu_friendslist"
-			            	 android:background="@null"
-			            	 android:clickable="false"
-			                 android:focusable="false" />
+		             android:layout_width="wrap_content"
+		             android:layout_height="wrap_content"
+		             android:layout_gravity="center"
+		             android:layout_marginTop="4dip"
+		             android:layout_marginBottom="4dip"
+		             android:layout_marginLeft="4dip"
+		             android:layout_marginRight="4dip"
+		             android:scaleType="fitCenter"
+		             android:adjustViewBounds="true"
+		             android:src="@drawable/collections_sort_by_size"
+		        	 android:background="@null"
+		        	 android:clickable="false"
+		             android:focusable="false" />
 			    <Button
-			            android:id="@+id/results_save_button"
-			            android:layout_width="wrap_content"
-			            android:layout_height="wrap_content"
-			            android:layout_gravity="center"
-			            android:textAppearance="?attr/actionMenuTextAppearance"
-			            style="?attr/buttonStyleSmall"
-			            android:textColor="?attr/actionMenuTextColor"
-			            android:singleLine="true"
-			            android:ellipsize="none"
-			            android:background="@null"
-			            android:paddingTop="4dip"
-			            android:paddingBottom="4dip"
-			            android:paddingLeft="4dip"
-			            android:paddingRight="4dip"
-			            android:focusable="false"
-			            android:clickable="false"
-			            android:text="@string/results_save"/>
+				      android:id="@+id/results_save_button"
+				      android:layout_width="wrap_content"
+				      android:layout_height="wrap_content"
+				      android:layout_gravity="center"
+				      android:textAppearance="?attr/actionMenuTextAppearance"
+				      style="?attr/buttonStyleSmall"
+				      android:textColor="?attr/actionMenuTextColor"
+				      android:singleLine="true"
+				      android:ellipsize="none"
+				      android:background="@null"
+				      android:paddingTop="4dip"
+				      android:paddingBottom="4dip"
+				      android:paddingLeft="4dip"
+				      android:paddingRight="4dip"
+				      android:focusable="false"
+				      android:clickable="false"
+				      android:text="@string/sortWinners"/>
 			</LinearLayout>
 			<LinearLayout
 			    android:clickable="true"
@@ -213,7 +202,7 @@
 			                 android:adjustViewBounds="true"
 			                 android:background="@null"
 			    			 android:clickable="false"
-			                 android:src="@drawable/ic_refresh"
+			                 android:src="@drawable/navigation_refresh"
 			                 android:focusable="false" />
 			    <Button android:id="@+id/results_reset_button"
 			            android:layout_width="wrap_content"

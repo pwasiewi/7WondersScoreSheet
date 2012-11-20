@@ -7,15 +7,15 @@ import java.util.Comparator;
 
 public class Game {
 
-    public ArrayList<Stages>  scoring_stages;
+    public ArrayList<STAGE>   scoring_stages;
     public ArrayList<Player>  player_list;
     private boolean           has_been_saved;
     
     public Game(){
         player_list    = new ArrayList<Player>();
-        scoring_stages = new ArrayList<Stages>(Arrays.asList(Stages.values()));
-        scoring_stages.remove(Stages.RESULTS);
-        scoring_stages.remove(Stages.PLAYERS);
+        scoring_stages = new ArrayList<STAGE>(Arrays.asList(STAGE.values()));
+        scoring_stages.remove(STAGE.RESULTS);
+        scoring_stages.remove(STAGE.PLAYERS);
         has_been_saved = false;
     }
     
@@ -48,9 +48,9 @@ public class Game {
      * @param _name   the name of the player
      * @param _wonder the Wonder enum of the player's wonder 
      */
-    public void addPlayer(String _name, Wonders _wonder)
+    public void addPlayer(String _name, WONDER _wonder, Boolean _expanded_science)
     {
-        player_list.add(new Player(_name, _wonder));
+        player_list.add(new Player(_name, _wonder, _expanded_science));
     }
     
     
@@ -134,7 +134,7 @@ public class Game {
      */ 
     private void generateStepWinners(){
 
-        for (Stages current_step : scoring_stages) {
+        for (STAGE current_step : scoring_stages) {
             
             int step_max = -9999999;
             ArrayList<Player> stage_winners = new ArrayList<Player>();
@@ -172,7 +172,7 @@ public class Game {
      * @param _index  the stage of the round to be scored
      * @param _index  the stage score for the player
      */
-    public void setPlayerStageScore(int _index, Stages _stage, int _score)
+    public void setPlayerStageScore(int _index, STAGE _stage, int _score)
     {
         player_list.get(_index).setStageScore(_stage, _score);
     }
@@ -184,7 +184,7 @@ public class Game {
      * @param _index  the stage of the round to be scored
      * @param _index  the stage score for the player
      */
-    public int getPlayerStageScore(int _index, Stages _stage)
+    public int getPlayerStageScore(int _index, STAGE _stage)
     {
         return player_list.get(_index).getStageScore(_stage);
     }
@@ -208,6 +208,36 @@ public class Game {
      */
     public boolean isSaved() {
         return has_been_saved;
+    }
+
+
+    public void sortByScores() {
+        Collections.sort(player_list, new Comparator<Player>()  {
+
+            @Override
+            public int compare(Player lhs, Player rhs) {
+                return rhs.getTotal() - lhs.getTotal();
+            } 
+        });
+    }
+
+
+    public void updatePlayerScienceScoring(boolean expanded_science) {
+        for(Player player : player_list)
+        {
+            player.setExpandedScience(expanded_science);
+        }
+        
+    }
+
+
+    public void computePlayersScienceScores() {
+        for(Player player : player_list)
+        {
+            player.getSciencePoints();
+        }
+        
+        
     }
 
 }

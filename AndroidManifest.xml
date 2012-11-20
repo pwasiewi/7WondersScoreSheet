@@ -10,7 +10,7 @@
               android:targetSdkVersion="15"/>
 
     <application
-        android:icon="@drawable/scoresheethd"
+        android:icon="@drawable/sevenwss_icon"
         android:label="@string/app_name">
         
         <activity
@@ -19,13 +19,21 @@
             android:name=".SevenWonderMain"
             android:label="@string/app_name" 
             android:theme="@style/ThisTheme">
-            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity android:name=".Settings" 
+            android:label="Settings" 
+            android:theme="@style/ThisTheme"
+            android:screenOrientation="portrait">
+		    <intent-filter>
+		       <category android:name="android.intent.category.DEFAULT" />
+		    </intent-filter>
+		</activity>
         
     </application>
 
