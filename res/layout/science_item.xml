@@ -39,6 +39,7 @@
 				android:layout_height="wrap_content"
 			    android:gravity="center"
 			    android:maxLength="1"
+			    android:ellipsize="end"
 			    android:hint="0"
 			    android:text=""/>  
 			<EditText
@@ -52,6 +53,7 @@
 				android:layout_width="36dp"
 				android:layout_height="wrap_content"
 			    android:gravity="center"
+			    android:ellipsize="end"
 			    android:hint="0"
 			    android:text=""/>    
 			<EditText
@@ -65,6 +67,7 @@
 				android:layout_width="36dp"
 				android:layout_height="wrap_content"
 			    android:gravity="center"
+			    android:ellipsize="end"
 			    android:hint="0"
 			    android:text=""/>    
 			<EditText
@@ -78,6 +81,7 @@
 				android:layout_width="36dp"
 				android:layout_height="wrap_content"
 			    android:gravity="center"
+			    android:ellipsize="end"
 			    android:hint="0"
 			    android:text=""/>     
 			<Button

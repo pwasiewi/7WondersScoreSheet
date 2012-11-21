@@ -38,6 +38,7 @@
 				android:layout_width="52dp"
 				android:layout_height="wrap_content"
 			    android:gravity="center"
+			    android:ellipsize="end"
 			    android:hint="0"
 			    android:text=""/>    
 			<Button

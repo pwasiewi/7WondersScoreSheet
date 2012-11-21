@@ -20,6 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/player_name_label"
+        android:singleLine="true"
+        android:maxLength="50"
         android:hint="@string/player_name_hint"  >
 
         <requestFocus />

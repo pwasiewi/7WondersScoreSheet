@@ -111,8 +111,8 @@
     
     
     <string name="settings_expanded_title">Expanded Scoring</string>
-    <string name="settings_expanded_science_summary">Automatically compute science score</string>
-    <string name="settings_expanded_science_title">Expanded Science Scoring</string>
+    <string name="settings_expanded_science_summary">Compute science score from symbol counts</string>
+    <string name="settings_expanded_science_title">Detailed Science</string>
     <string name="settings_expanded_science_key">settings_science</string>
     
     

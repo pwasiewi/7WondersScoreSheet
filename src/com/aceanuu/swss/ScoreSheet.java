@@ -2,16 +2,16 @@ package com.aceanuu.swss;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -31,7 +31,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
 import android.util.Log;
-import android.view.LayoutInflater; 
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -64,7 +64,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.viewpagerindicator.TabPageIndicator;
 
-public class SevenWonderMain extends SherlockActivity {
+public class ScoreSheet extends SherlockActivity {
     
     private int                    NUM_TABS;
     private int                          dp28;
@@ -430,21 +430,8 @@ public class SevenWonderMain extends SherlockActivity {
 
         int   current_page  = viewPager.getCurrentItem();
         STAGE current_stage = stages.get(current_page);
-        
-//        Log.e("onActivityResult", "initial stage " + STAGE.toString(current_stage));
-//        Log.e("onActivityResult", "initial stage " + current_stage.toString());
-//        Log.e("onActivityResult", "initial page  " + current_page);
-        
-//        int money   = stages.indexOf(STAGE.MONEY);
-//        int results = stages.indexOf(STAGE.RESULTS);
-//        int guilds  = stages.indexOf(STAGE.GUILD);
-//        int leaders = stages.indexOf(STAGE.LEADERS);
-        
         if(cities_enabled != previous_cities || leaders_enabled != previous_leader)
         {
-
-//            Log.e("onActivityResult", "changed expansion packs");
-//            tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
             viewPager.setAdapter(pagerAdapter);
             pagerAdapter.notifyDataSetChanged();
             buildStages(); 
@@ -465,8 +452,6 @@ public class SevenWonderMain extends SherlockActivity {
         } 
         
         int index = stages.indexOf(current_stage);
-//        Log.e("onActivityResult", "index of previous current stage " + index);
-//        Log.e("onActivityResult", "previous current index " + current_page);
         
         if(index == -1)
         {
@@ -487,7 +472,6 @@ public class SevenWonderMain extends SherlockActivity {
             
             index = current_page;
         }
-//        Log.e("onActivityResult", "final current index " + index);
         viewPager.setCurrentItem(index);
     }
 
@@ -522,12 +506,13 @@ public class SevenWonderMain extends SherlockActivity {
      * Creates a new game and moves the user view to step 1
      */
     public void beginNewGame() {
-        finishPlayerEdits();
-//        if(!current_game.isSaved())
-//            resultsNotSavedPrompt();
+//        finishPlayerEdits(); 
         current_game.newGame();
         viewPager.setCurrentItem(0);
         notifyAllAdapters();
+        viewPager.setAdapter(pagerAdapter);
+        pagerAdapter.notifyDataSetChanged();
+        pagerAdapter.instantiateItem(viewPager, stages.indexOf(STAGE.SCIENCE));
     }
 
 
@@ -535,7 +520,7 @@ public class SevenWonderMain extends SherlockActivity {
      * Called when user wants to cease modifying player configuration
      * Exit edit states on user properties
      */
-    private void finishPlayerEdits() {
+//    private void finishPlayerEdits() {
 //        if(nameAdapter.editMode)
 //        {
 //            nameAdapter.commitSelectedWonders();
@@ -546,7 +531,7 @@ public class SevenWonderMain extends SherlockActivity {
 //            nameAdapter.removeSelected();
 //            nameAdapter.toggleRemoveMode();
 //        } 
-    }
+//    }
 
 
     /**
@@ -635,7 +620,7 @@ public class SevenWonderMain extends SherlockActivity {
      * Adds player to the current game
      */
     private void addPlayer(String name, WONDER wonder) {
-        finishPlayerEdits();
+//        finishPlayerEdits();
         current_game.addPlayer(name, wonder, expanded_science);
         notifyAllAdapters();
     }
@@ -952,7 +937,7 @@ public class SevenWonderMain extends SherlockActivity {
         
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-
+          //abandon current focus 
             ViewHolder holder;
             if (convertView == null) {
                 Log.d("getV", "convertView is null, pos " + position);
@@ -972,16 +957,24 @@ public class SevenWonderMain extends SherlockActivity {
                 Log.w("getV", "convertView is not null, pos " + position);
                 holder = (ViewHolder) convertView.getTag();
                 holder.name.setText(current_game.getPlayer(position).getName()); 
+                holder.val = (EditText) convertView.findViewById(R.id.stepScore);     
             }
-                        
+//                        
             final int f_position = position;
             
             //Fill EditText with the value you have in data source
             int score_item = current_game.getPlayerStageScore(position, stage);
+            Log.w("getV", "stage_list = " + stage.toString());
+            Log.w("getV", "player_pos = " + position);
+            Log.w("getV", "score_item = " + score_item);
+            Log.w("getV", "-----------------------------------------");
             if(score_item != 0)
                 holder.val.setText(score_item + "");
+            else
+                holder.val.setText(""); 
                 
-            holder.val.setId(position);
+                
+//            holder.val.setId(position);
 
             //so it can be used below
             final EditText score = holder.val;
@@ -1019,37 +1012,45 @@ public class SevenWonderMain extends SherlockActivity {
             });
          
             holder.val.addTextChangedListener(new TextWatcher() {
+                int pos = f_position;
+                EditText scorebox = score;
                 
                 public void afterTextChanged(Editable s) {
                     
                     int value;
-                    if (score.getText().toString().equals("") || score.getText().toString().equals("-"))
+                    if (scorebox.getText().toString().equals("") || scorebox.getText().toString().equals("-"))
                     {
                         value = 0;
                     }else
-                    if (score.getText().toString().equals("0") )
+                    if (scorebox.getText().toString().equals("0") )
                     {
                         value = 0;
-                        score.setText("");
+                        scorebox.setText("");
                     }
                     else 
                     {  
                         try 
                         {
-                            value = Integer.parseInt(score.getText().toString());
+                            value = Integer.parseInt(scorebox.getText().toString());
                         }
                         catch(Exception e)
                         {
-                            score.setText("");
+                            scorebox.setText("");
                             value = 0;
                         }
                     }
-                    current_game.setPlayerStageScore(f_position, stage, value);
+                    current_game.setPlayerStageScore(pos, stage, value);
+                    Log.w("setPlayerStageScore", "scbox = " + scorebox.getId()); 
+                    Log.w("setPlayerStageScore", "stage = " + stage.toString());
+                    Log.w("setPlayerStageScore", "pos   = " + pos);
+                    Log.w("setPlayerStageScore", "value = " + value);
+                    Log.w("setPlayerStageScore", "=========================================");
                 }      
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}
             });
-            
+
+//            convertView.setTag(holder);
             return convertView;
         }
     }
@@ -1107,8 +1108,11 @@ public class SevenWonderMain extends SherlockActivity {
                 Log.w("getV", "convertView is not null, pos " + position);
                 science = (ScienceHolder) convertView.getTag();
                 science.name.setText(current_game.getPlayer(position).getName()); 
-                Log.w("getV", "1111111111111111111111 JUST RETURNING WUT " + position);
-//                return convertView;
+                science.cog = (EditText) convertView.findViewById(R.id.numCog);
+                science.compass = (EditText) convertView.findViewById(R.id.numCompass);
+                science.tablet  = (EditText) convertView.findViewById(R.id.numTablet);
+                science.wild    = (EditText) convertView.findViewById(R.id.numWild);
+                Log.w("getV", "1111111111111111111111 JUST RETURNING WUT " + position); 
             }
                         
             final int f_position = position;
@@ -1182,12 +1186,20 @@ public class SevenWonderMain extends SherlockActivity {
 
             if(current_game.getPlayer(position).getScienceScore(COMPASS) != 0)
                 science.compass.setText(current_game.getPlayer(position).getScienceScore(COMPASS) + "");
+            else
+                science.compass.setText("");
             if(current_game.getPlayer(position).getScienceScore(WILD) != 0)
                 science.wild.setText(current_game.getPlayer(position).getScienceScore(WILD) + "");
+            else
+                science.wild.setText("");
             if(current_game.getPlayer(position).getScienceScore(COG) != 0)
                 science.cog.setText(current_game.getPlayer(position).getScienceScore(COG) + "");
+            else
+                science.cog.setText("");
             if(current_game.getPlayer(position).getScienceScore(TABLET) != 0)
                 science.tablet.setText(current_game.getPlayer(position).getScienceScore(TABLET) + "");
+            else
+                science.tablet.setText("");
 
             science.cog.addTextChangedListener(getScienceWatcher(science.cog, position, COG));
             science.compass.addTextChangedListener(getScienceWatcher(science.compass, position, COMPASS));
@@ -1206,7 +1218,10 @@ public class SevenWonderMain extends SherlockActivity {
         {
             return new TextWatcher() {
                 
-                public void afterTextChanged(Editable s) {
+                public void afterTextChanged(Editable s) {} 
+                
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
                     int value;
                     if(box.getText().toString().equals("") || box.getText().toString().equals("-"))
                     {
@@ -1231,10 +1246,7 @@ public class SevenWonderMain extends SherlockActivity {
                         }
                     }
                     current_game.getPlayer(position).setScienceScore(value, CATEGORY);
-                }      
-                
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                }     
             };
         }
       
