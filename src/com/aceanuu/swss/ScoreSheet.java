@@ -563,6 +563,13 @@ public class ScoreSheet extends SherlockActivity {
         temp.show();
     }
 
+//    @Override
+//    public void onDestroy()
+//    {
+//        SharedPreferences.Editor ed = prefs.edit(); 
+//        ed.p 
+//    }
+    
     
     /**
      * Called when user wants to add another player to the game
