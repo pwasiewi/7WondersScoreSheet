@@ -2,9 +2,10 @@ package com.aceanuu.swss;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -101,7 +102,8 @@ public class ScoreSheet extends SherlockActivity {
     public final static int COG     = 1;
     public final static int COMPASS = 2;
     public final static int WILD    = 3;
-    private final static String PREF_KEY = "seven_wonders_score_sheet_preferences";
+    private final static String PREF_KEY              = "seven_wonders_score_sheet_preferences";
+    private final static String PREFS_PREV_PLAYER_KEY = "seven_wonders_prev_player_key";
     TabPageIndicator tabInd;
       String science_key;
       String leaders_key;
@@ -563,12 +565,20 @@ public class ScoreSheet extends SherlockActivity {
         temp.show();
     }
 
-//    @Override
-//    public void onDestroy()
-//    {
-//        SharedPreferences.Editor ed = prefs.edit(); 
-//        ed.p 
-//    }
+    @Override
+    public void onDestroy()
+    {
+        Set<String> playerNames           = new HashSet<String>();
+        SharedPreferences.Editor prefs_ed = prefs.edit(); 
+//        StringBuffer player_name_buffer   = new StringBuffer();
+        
+        for(int player_index = 0; player_index < current_game.playerCount(); ++player_index)
+        {
+            playerNames.add(current_game.getPlayer(player_index).getName());
+            prefs_ed.putInt(current_game.getPlayer(player_index).getName(), current_game.getPlayer(player_index).getWonder().ordinal());
+        }
+        prefs_ed.putStringSet(PREFS_PREV_PLAYER_KEY, playerNames);
+    }
     
     
     /**
@@ -594,6 +604,7 @@ public class ScoreSheet extends SherlockActivity {
                 return false;
             }
         });
+        
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
