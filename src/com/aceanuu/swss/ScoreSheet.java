@@ -104,13 +104,16 @@ public class ScoreSheet extends SherlockActivity {
     public final static int WILD    = 3;
     private final static String PREF_KEY              = "seven_wonders_score_sheet_preferences";
     private final static String PREFS_PREV_PLAYER_KEY = "seven_wonders_prev_player_key";
+    private final static String PREFS_PREV_DIVIDER    = "#@4%@A%@0";
+    private final static String PREFS_PREV_NOTHING    = "NO_PLAYERS";
     TabPageIndicator tabInd;
-      String science_key;
-      String leaders_key;
-      String cities_key;
+    String science_key;
+    String leaders_key;
+    String cities_key;
     
     SharedPreferences prefs;
-         
+    
+    
     
     /**
      * Called on app creation.
@@ -380,6 +383,7 @@ public class ScoreSheet extends SherlockActivity {
         initializeData();
         initializeViews();
         initializeListeners();
+        loadPrevPlayers();
         
 
     }
@@ -566,18 +570,72 @@ public class ScoreSheet extends SherlockActivity {
     }
 
     @Override
-    public void onDestroy()
-    {
-        Set<String> playerNames           = new HashSet<String>();
+    public void onPause()
+    { 
+
+        Log.w("onPause", "BEGIN onPause ----------------------------------"); 
+        super.onPause();
         SharedPreferences.Editor prefs_ed = prefs.edit(); 
-//        StringBuffer player_name_buffer   = new StringBuffer();
+        StringBuffer player_name_buffer   = new StringBuffer();
         
-        for(int player_index = 0; player_index < current_game.playerCount(); ++player_index)
+        if(current_game.playerCount() == 0)
         {
-            playerNames.add(current_game.getPlayer(player_index).getName());
-            prefs_ed.putInt(current_game.getPlayer(player_index).getName(), current_game.getPlayer(player_index).getWonder().ordinal());
+
+            Log.w("onPause", "no players, 0");
+            prefs_ed.putString(PREFS_PREV_PLAYER_KEY, PREFS_PREV_NOTHING); 
         }
-        prefs_ed.putStringSet(PREFS_PREV_PLAYER_KEY, playerNames);
+        else
+        {
+            Log.w("onPause", "some players, " + current_game.playerCount());
+            for(int player_index = 0; player_index < current_game.playerCount(); ++player_index)
+            {
+                player_name_buffer.append(current_game.getPlayer(player_index).getName());
+
+                Log.w("onPause", "===============================================");
+                Log.w("onPause", "storing a player: " + current_game.getPlayer(player_index).getName());
+                player_name_buffer.append(PREFS_PREV_DIVIDER);
+                
+                Log.w("onPause", "storing a player: " + current_game.getPlayer(player_index).getWonder().ordinal());
+                prefs_ed.putInt(current_game.getPlayer(player_index).getName(), current_game.getPlayer(player_index).getWonder().ordinal());
+            }
+            Log.w("onPause", "===============================================");
+            String players_encoded  = player_name_buffer.toString();
+            
+            Log.w("onPause", "players_encoded: " +     players_encoded);
+            prefs_ed.putString(PREFS_PREV_PLAYER_KEY, players_encoded);
+        }
+        
+        prefs_ed.commit();
+    }
+    
+    public void loadPrevPlayers()
+    {
+        prefs        = getSharedPreferences(PREF_KEY, MODE_PRIVATE); 
+        
+        Log.w("loadPrevPlayers", "BEGIN loadPrevPlayers ----------------------------------"); 
+        String prev_player_string = prefs.getString(PREFS_PREV_PLAYER_KEY, PREFS_PREV_NOTHING);
+        
+        Log.w("loadPrevPlayers", "prev_player_string: " + prev_player_string); 
+        
+        if(!prev_player_string.equals(PREFS_PREV_NOTHING))
+        {    
+            String[] players = prev_player_string.split(PREFS_PREV_DIVIDER);
+
+            Log.w("loadPrevPlayers", "==============================================="); 
+            Log.w("loadPrevPlayers", "some players: " + players.length);
+            
+            for(String player : players)
+            {
+                Log.w("loadPrevPlayers", "===============================================");
+                Log.w("loadPrevPlayers", "loading a player: " + player );
+                Log.w("loadPrevPlayers", "loading a player: " + WONDER.toString(wonder_list[prefs.getInt(player, 0)]));
+                addPlayer(player, wonder_list[prefs.getInt(player, 0)]);
+            }
+        }
+        else
+        {
+            Log.w("loadPrevPlayers", "no players, it equals NO PLAYERS"); 
+        }
     }
     
     
@@ -661,8 +719,10 @@ public class ScoreSheet extends SherlockActivity {
     public void notifyAllAdapters() {
         nameAdapter.notifyDataSetChanged();
         sumAdapter.notifyDataSetChanged();
+        
         if(science_adapter != null)
             science_adapter.notifyDataSetChanged();
+        
         for (STAGE temp : score_adapter_map.keySet()) {
             score_adapter_map.get(temp).notifyDataSetChanged();
         }
