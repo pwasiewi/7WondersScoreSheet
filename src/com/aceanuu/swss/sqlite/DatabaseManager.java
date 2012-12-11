@@ -32,7 +32,7 @@ public class DatabaseManager extends SQLiteOpenHelper  {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 28;
  
     // Database Name
     private static final String DATABASE_NAME = "SEVEN_WONDERS_SCORE_SHEET_DATABASE";
@@ -112,14 +112,15 @@ public class DatabaseManager extends SQLiteOpenHelper  {
 
         String CREATE_TABLE_SCORE = "CREATE TABLE " + TABLE_SCORE 
                 + "("
-                + SGAMEID   + " INTEGER PRIMARY KEY AUTOINCREMENT," 
+                + SGAMEID   + " INTEGER," 
                 + SRESULTSID     +  " INTEGER,"
                 + SPLAYERID     +  " INTEGER,"
                 + SCATEGORY    + " TEXT,"
                 + SSCORE    + " INTEGER,"
                 + SMEDAL    + " INTEGER,"
                 + "FOREIGN KEY(" + SRESULTSID + ") REFERENCES " + TABLE_RESULT + "(" + RID + ")" 
-                + "FOREIGN KEY(" + SPLAYERID + ") REFERENCES " + TABLE_PLAYER + "(" + PID + ")" 
+                + "FOREIGN KEY(" + SPLAYERID + ") REFERENCES " + TABLE_PLAYER + "(" + PID + ")"
+                + "PRIMARY KEY(" + SGAMEID +", " + SRESULTSID +", " + SPLAYERID +", " +SCATEGORY + ")"
                 + ");";
         db.execSQL(CREATE_TABLE_SCORE);
         
@@ -216,7 +217,10 @@ public class DatabaseManager extends SQLiteOpenHelper  {
           { 
               Log.d("modifyGame", "about to insertResult with RID of " + game.getPlayer(i).getRID());
               if(game.getPlayer(i).getRID() == -1)
-                  insertResult(game.getPlayer(i), GID, time); 
+              {
+                  int rid = insertResult(game.getPlayer(i), GID, time);
+                  game.getPlayer(i).setRID(rid);
+              }
               else
                   updateResult(game.getPlayer(i), GID, time);
           }
@@ -316,10 +320,6 @@ public class DatabaseManager extends SQLiteOpenHelper  {
           for(STAGE stage : p1.step_scores.keySet())
           {
               ContentValues score = new ContentValues();
-              score.put(SRESULTSID, id);
-              score.put(SPLAYERID, p1.pid);
-              score.put(SGAMEID, gid);
-              score.put(SCATEGORY, stage.toString());
               score.put(SSCORE, p1.step_scores.get(stage));
               if(p1.step_wins.contains(stage))
                   score.put(SMEDAL, 1);
@@ -367,6 +367,7 @@ public class DatabaseManager extends SQLiteOpenHelper  {
                 do
                 {    
                     RID = cursor.getInt(cursor.getColumnIndex("RID"));
+                    Log.d("removeResult", "///////////////// RID = " + RID);
                 } while(cursor.moveToNext());  
             }
            
@@ -374,7 +375,7 @@ public class DatabaseManager extends SQLiteOpenHelper  {
 
             Log.d("removeResult", "removing result: WHERE " + RPLAYERID + " = " + pid
                     + " AND " + RGAMEID  + " = " + gid);
-            db.delete(TABLE_RESULT, "WHERE " + RPLAYERID + " = " + pid
+            db.delete(TABLE_RESULT, RPLAYERID + " = " + pid
                                     + " AND " + RGAMEID  + " = " + gid, null);
             
             String query_scores  = "SELECT " + SCATEGORY + 
@@ -384,16 +385,16 @@ public class DatabaseManager extends SQLiteOpenHelper  {
                     " AND "  + SPLAYERID  + " = " + pid;
             Cursor cursor_scores = db.rawQuery(query_scores, null);
             
-            if (cursor.moveToFirst()){
+            if (cursor_scores.moveToFirst()){
                 do
                 {    
-                    String cat = cursor.getString(cursor.getColumnIndex("RID"));
+                    String cat = cursor_scores.getString(cursor_scores.getColumnIndex(SCATEGORY));
                     Log.d("removeResult", "removing score: " + cat);
                     db.delete(TABLE_SCORE, 
-                            " WHERE " + SRESULTSID + " = " + RID + 
+                            SRESULTSID + " = " + RID + 
                             " AND "  + SPLAYERID  + " = " + pid +
-                            " AND "  + SCATEGORY  + " = " + cat, null);
-                } while(cursor.moveToNext());  
+                            " AND "  + SCATEGORY  + " = \"" + cat + "\"", null);
+                } while(cursor_scores.moveToNext());  
             }
     
           db.setTransactionSuccessful();
@@ -426,7 +427,7 @@ public class DatabaseManager extends SQLiteOpenHelper  {
                 Cursor cursor2 = db.rawQuery(query2, null);
                 if(cursor2.getCount() != 0) 
                 {
-                    exisitingPID = cursor2.getInt(cursor.getColumnIndex(PID));
+                    exisitingPID = cursor2.getInt(cursor2.getColumnIndex(PID));
                     return new int[] {-2, exisitingPID}; //if theres one set to not display
                 }
                 return new int[] {-1, exisitingPID}; //if theres one already and its displayable
@@ -521,10 +522,6 @@ public class DatabaseManager extends SQLiteOpenHelper  {
     }
 
 
-    public void removeResult(Integer pid2, int gID2) {
-        // TODO Auto-generated method stub
-        
-    }
 
 
 }

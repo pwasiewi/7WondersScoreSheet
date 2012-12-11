@@ -68,6 +68,7 @@ public class Game {
     public void addPlayer(String _name, WONDER _wonder, int _pid, Boolean _expanded_science)
     {
         player_list.add(new Player(_name, _wonder, _pid, _expanded_science));
+        player_pids.add(_pid);
     }
     
     
@@ -79,6 +80,7 @@ public class Game {
     public void removePlayer(int _index)
     {
         player_list.remove(_index);
+        player_pids.remove(_index);
     }
 
     
@@ -235,6 +237,7 @@ public class Game {
         {
             Log.d("saveGame", "insertGame");
             setGID(dbm.insertGame(this));
+            
             for(Integer pid : player_pids)
                 player_pids_at_last_save.add(pid);
         }
