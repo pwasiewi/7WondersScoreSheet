@@ -2,9 +2,7 @@ package com.aceanuu.swss;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -41,6 +39,8 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -59,6 +59,7 @@ import android.widget.Toast;
 import com.aceanuu.swss.logic.Game;
 import com.aceanuu.swss.logic.STAGE;
 import com.aceanuu.swss.logic.WONDER;
+import com.aceanuu.swss.sqlite.DatabaseManager;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -67,7 +68,7 @@ import com.viewpagerindicator.TabPageIndicator;
 
 public class ScoreSheet extends SherlockActivity {
     
-    private int                    NUM_TABS;
+    private int                          NUM_TABS;
     private int                          dp28;
     
     private Game                         current_game;
@@ -77,7 +78,7 @@ public class ScoreSheet extends SherlockActivity {
 
     private LinearLayout                 players_wonder_click;
     private LinearLayout                 players_remove_click;
-    private LinearLayout                 results_newgame_click;
+    private LinearLayout                 results_save_ll;
     private LinearLayout                 results_sort_click;
     
     private LayoutInflater               factory;
@@ -94,25 +95,28 @@ public class ScoreSheet extends SherlockActivity {
     HashMap<STAGE, Integer>              colors;
     private Map<STAGE, ScoreAdapter>     score_adapter_map;
 
-    private boolean                      expanded_science;
-    private boolean                      leaders_enabled;
-    private boolean                      cities_enabled;
     private  ArrayList<STAGE>            stages;
-    public final static int TABLET  = 0;
-    public final static int COG     = 1;
-    public final static int COMPASS = 2;
-    public final static int WILD    = 3;
+    
+    public final static int TABLET       = 0;
+    public final static int COG          = 1;
+    public final static int COMPASS      = 2;
+    public final static int WILD         = 3;
+    
     private final static String PREF_KEY              = "seven_wonders_score_sheet_preferences";
     private final static String PREFS_PREV_PLAYER_KEY = "seven_wonders_prev_player_key";
     private final static String PREFS_PREV_DIVIDER    = "#@4%@A%@0";
     private final static String PREFS_PREV_NOTHING    = "NO_PLAYERS";
+    
     TabPageIndicator tabInd;
     String science_key;
     String leaders_key;
     String cities_key;
     
     SharedPreferences prefs;
+    DatabaseManager   dbm;
     
+    ArrayList<String> player_names;
+    boolean addedNewPlayerSinceLastNameCache; 
     
     
     /**
@@ -127,9 +131,10 @@ public class ScoreSheet extends SherlockActivity {
         science_key = getApplicationContext().getResources().getString(R.string.settings_expanded_science_key);
         leaders_key = getApplicationContext().getResources().getString(R.string.settings_expansions_leaders_key);
         cities_key  = getApplicationContext().getResources().getString(R.string.settings_expansions_cities_key);
-        expanded_science = prefs.getBoolean(science_key, true);
-        leaders_enabled  = prefs.getBoolean(leaders_key, true);
-        cities_enabled   = prefs.getBoolean(cities_key,  true);
+        
+        current_game.expanded_science = prefs.getBoolean(science_key, true);
+        current_game.leaders_enabled  = prefs.getBoolean(leaders_key, true);
+        current_game.cities_enabled   = prefs.getBoolean(cities_key,  true);
         
         colors = new HashMap<STAGE, Integer>();
         colors.put(STAGE.PLAYERS, getResources().getColor(R.color.player));
@@ -163,6 +168,7 @@ public class ScoreSheet extends SherlockActivity {
         wonder_list   = WONDER.values();
         
         buildStages();
+        dbm = new DatabaseManager(this);
         
         //STUFF FOR EXPANDED SCIENCE
 //        if(expanded_science)
@@ -204,7 +210,7 @@ public class ScoreSheet extends SherlockActivity {
         stages.add(STAGE.GUILD);
         stages.add(STAGE.RESULTS);
 
-        if(leaders_enabled)
+        if(current_game.leaders_enabled)
         {
             int resultsindex = stages.indexOf(STAGE.RESULTS);
             stages.add(resultsindex, STAGE.LEADERS);
@@ -214,7 +220,7 @@ public class ScoreSheet extends SherlockActivity {
             current_game.clearScoresCategory(STAGE.LEADERS);
         }
         
-        if(cities_enabled)
+        if(current_game.cities_enabled)
         {
             int moneyindex = stages.indexOf(STAGE.MONEY);
             stages.add(moneyindex+1, STAGE.DEBT);
@@ -261,7 +267,7 @@ public class ScoreSheet extends SherlockActivity {
         players_wonder_click     = (LinearLayout) players_bar.findViewById(R.id.players_wonder_ll);
         players_remove_click   = (LinearLayout) players_bar.findViewById(R.id.players_remove_ll);
         
-        results_newgame_click  = (LinearLayout) results_bar.findViewById(R.id.results_reset_ll);
+        results_save_ll  = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
 //        results_savegame_click = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
         results_sort_click = (LinearLayout) results_bar.findViewById(R.id.results_sort_ll);
         
@@ -353,12 +359,14 @@ public class ScoreSheet extends SherlockActivity {
             }
         });    
         
-        results_newgame_click.setOnClickListener(new OnClickListener() {
+        results_save_ll.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                showResetScores();
+                //showResetScores();
+                showSaveScore();
             }
+
         });   
         
         results_sort_click.setOnClickListener(new OnClickListener() {
@@ -426,17 +434,18 @@ public class ScoreSheet extends SherlockActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) { 
 
-        boolean previous_science = expanded_science;
-        boolean previous_leader  = leaders_enabled;
-        boolean previous_cities  = cities_enabled;
+        boolean previous_science = current_game.expanded_science;
+        boolean previous_leader  = current_game.leaders_enabled;
+        boolean previous_cities  = current_game.cities_enabled;
 
-        expanded_science = prefs.getBoolean(science_key, expanded_science);
-        leaders_enabled  = prefs.getBoolean(leaders_key, leaders_enabled);
-        cities_enabled   = prefs.getBoolean(cities_key,  cities_enabled);
+        current_game.expanded_science = prefs.getBoolean(science_key, current_game.expanded_science);
+        current_game.leaders_enabled  = prefs.getBoolean(leaders_key, current_game.leaders_enabled);
+        current_game.cities_enabled   = prefs.getBoolean(cities_key,  current_game.cities_enabled);
 
         int   current_page  = viewPager.getCurrentItem();
         STAGE current_stage = stages.get(current_page);
-        if(cities_enabled != previous_cities || leaders_enabled != previous_leader)
+        
+        if(current_game.cities_enabled != previous_cities || current_game.leaders_enabled != previous_leader)
         {
             viewPager.setAdapter(pagerAdapter);
             pagerAdapter.notifyDataSetChanged();
@@ -447,9 +456,9 @@ public class ScoreSheet extends SherlockActivity {
             buildTabColors();
         }
         
-        if(expanded_science != previous_science)
+        if(current_game.expanded_science != previous_science)
         {
-            current_game.updatePlayerScienceScoring(expanded_science);
+            current_game.updatePlayerScienceScoring(current_game.expanded_science);
             current_game.computePlayersScienceScores(); 
             notifyAllAdapters();
             pagerAdapter.notifyDataSetChanged();
@@ -473,7 +482,7 @@ public class ScoreSheet extends SherlockActivity {
                 --current_page;
             }
             
-            if(current_stage == STAGE.CITIES && !leaders_enabled)
+            if(current_stage == STAGE.CITIES && !current_game.leaders_enabled)
                 --current_page;
             
             index = current_page;
@@ -506,7 +515,38 @@ public class ScoreSheet extends SherlockActivity {
         temp.show();
     }
 
+    private void showSaveScore() {
+        Dialog temp = new AlertDialog.Builder(this)
+        .setTitle("Save Scores?")
+        .setPositiveButton("Save",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveOrUpdateGameScore();
+                    }
+                })
+        .setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int whichButton) {
+                        }
+                    }).create();
+        
+        temp.setOnDismissListener(new OnDismissListener() {
+        
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+        }
+        });
+        temp.show(); 
+    }
 
+    
+
+
+    private void saveOrUpdateGameScore() {
+        current_game.saveGame(dbm);
+    }
+    
+    
     /**
      * Called when user wants to start scoring a new game
      * Creates a new game and moves the user view to step 1
@@ -546,12 +586,12 @@ public class ScoreSheet extends SherlockActivity {
      */
     private void resultsNotSavedPrompt() {
         Dialog temp = new AlertDialog.Builder(this)
-        .setTitle("Resutls not Saved")
+        .setTitle("Results not Saved")
         .setMessage("Results for this game have not been saved.")
         .setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        current_game.saveGame();
+                        current_game.saveGame(dbm);
                     }
                 })
         .setNegativeButton("Don't Save",
@@ -644,10 +684,19 @@ public class ScoreSheet extends SherlockActivity {
      * Displays the necessary prompt to capture data necessary for a new player to be made
      */
     private void addPlayerPrompt() {
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final View playerPromptView = factory.inflate(R.layout.player_dialog, null);
-        final Spinner spinnerWonder = (Spinner) playerPromptView.findViewById(R.id.wonder_spinner);
-        final EditText inputName = (EditText) playerPromptView.findViewById(R.id.player_name);
+        final AlertDialog.Builder alert      = new AlertDialog.Builder(this);
+        final View playerPromptView          = factory.inflate(R.layout.player_dialog, null);
+        final Spinner spinnerWonder          = (Spinner) playerPromptView.findViewById(R.id.wonder_spinner);
+        final AutoCompleteTextView inputName = (AutoCompleteTextView) playerPromptView.findViewById(R.id.player_name);
+        
+//        if(!addedNewPlayerSinceLastNameCache)
+//        {
+            player_names = dbm.getPlayerNames(); 
+//        }
+        
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_dropdown_item_1line, player_names);
+        
+        inputName.setAdapter(adapter);
         
         inputName.requestFocus();
         alert.setTitle("Add Player");
@@ -695,10 +744,61 @@ public class ScoreSheet extends SherlockActivity {
      * Called after user enters player creation data
      * Adds player to the current game
      */
-    private void addPlayer(String name, WONDER wonder) {
-//        finishPlayerEdits();
-        current_game.addPlayer(name, wonder, expanded_science);
+    private void addPlayer(String name, WONDER wonder) { 
+        
+        int[] status = dbm.insertPlayer(name);
+
+        //if the player has never been used before
+        if(status[0] >= 0)
+        {
+            current_game.addPlayer(name, wonder, status[1], current_game.expanded_science);
+        }
+        else
+        //if theres one set to not display
+        if(status[0] == -2)
+        {    
+            promptForOverride(name, wonder, status[1], current_game.expanded_science);
+        }
+        else 
+        //if theres one already and its displayable
+        if(status[0] == -1)
+        {
+            current_game.addPlayer(name, wonder, status[1], current_game.expanded_science);
+        }
+        
         notifyAllAdapters();
+        
+    }
+
+
+    private void promptForOverride(final String name, final WONDER wonder, final  int pid, final  boolean expanded_science) { 
+        final DatabaseManager dbm_final = dbm;
+        
+        Dialog temp = new AlertDialog.Builder(this)
+        .setTitle("Name Conflict")
+        .setMessage("There is a previously deteleted player named " + name + ".")
+        .setPositiveButton("Resume Existing",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dbm_final.setPlayerDisplayable(pid, true);
+                }
+            })
+        .setNegativeButton("Cancel",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog,int whichButton) {
+
+                    Toast.makeText(ctx, "Try again. Each player must have a unique name.",Toast.LENGTH_LONG).show();
+                }
+            }).create();
+        
+        temp.setOnDismissListener(new OnDismissListener() {
+        
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+        }
+        });
+        temp.show();
+        
     }
 
 
@@ -787,7 +887,7 @@ public class ScoreSheet extends SherlockActivity {
                     content.setAdapter(sumAdapter);
                     return temp;
                 }
-                if (this_stage == STAGE.SCIENCE && expanded_science) 
+                if (this_stage == STAGE.SCIENCE && current_game.expanded_science) 
                 {
                     RelativeLayout label =  (RelativeLayout) factory.inflate(R.layout.label_science, null);
                     labelBox.addView(label);
@@ -1118,11 +1218,11 @@ public class ScoreSheet extends SherlockActivity {
                         }
                     }
                     current_game.setPlayerStageScore(pos, stage, value);
-                    Log.w("setPlayerStageScore", "scbox = " + scorebox.getId()); 
-                    Log.w("setPlayerStageScore", "stage = " + stage.toString());
-                    Log.w("setPlayerStageScore", "pos   = " + pos);
-                    Log.w("setPlayerStageScore", "value = " + value);
-                    Log.w("setPlayerStageScore", "=========================================");
+//                    Log.w("setPlayerStageScore", "scbox = " + scorebox.getId()); 
+//                    Log.w("setPlayerStageScore", "stage = " + stage.toString());
+//                    Log.w("setPlayerStageScore", "pos   = " + pos);
+//                    Log.w("setPlayerStageScore", "value = " + value);
+//                    Log.w("setPlayerStageScore", "=========================================");
                 }      
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -1168,7 +1268,7 @@ public class ScoreSheet extends SherlockActivity {
             final ScienceHolder science;
             if (convertView == null) {
                 
-                Log.d("SCIENCE", "convertView is null, SCIENCE pos " + position);
+                //Log.d("SCIENCE", "convertView is null, SCIENCE pos " + position);
                 convertView = factory.inflate(R.layout.science_item, null);
                 science = new ScienceHolder((EditText) convertView.findViewById(R.id.numCog),
                                             (EditText) convertView.findViewById(R.id.numCompass),
@@ -1183,7 +1283,7 @@ public class ScoreSheet extends SherlockActivity {
                 
                 convertView.setTag(science);
             } else {
-                Log.w("getV", "convertView is not null, pos " + position);
+                //Log.w("getV", "convertView is not null, pos " + position);
                 science = (ScienceHolder) convertView.getTag();
                 science.name.setText(current_game.getPlayer(position).getName()); 
                 science.cog = (EditText) convertView.findViewById(R.id.numCog);

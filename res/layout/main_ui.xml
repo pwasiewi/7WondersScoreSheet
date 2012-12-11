@@ -179,7 +179,7 @@
 			<LinearLayout
 			    android:clickable="true"
 			    android:layout_weight="1"
-			    android:id="@+id/results_reset_ll"
+			    android:id="@+id/results_save_ll"
 			    xmlns:android="http://schemas.android.com/apk/res/android"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
@@ -202,7 +202,7 @@
 			                 android:adjustViewBounds="true"
 			                 android:background="@null"
 			    			 android:clickable="false"
-			                 android:src="@drawable/navigation_refresh"
+			                 android:src="@drawable/result_save"
 			                 android:focusable="false" />
 			    <Button android:id="@+id/results_reset_button"
 			            android:layout_width="wrap_content"
@@ -220,7 +220,7 @@
 			            android:paddingRight="4dip"
 			            android:focusable="false"
 			            android:clickable="false"
-			            android:text="@string/results_new" />
+			            android:text="@string/results_save" />
 			</LinearLayout>
 		</LinearLayout>
 	

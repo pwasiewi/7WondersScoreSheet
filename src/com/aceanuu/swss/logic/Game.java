@@ -5,18 +5,29 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
+import android.util.Log;
+
+import com.aceanuu.swss.sqlite.DatabaseManager;
+
 public class Game {
 
     public ArrayList<STAGE>   scoring_stages;
-    public ArrayList<Player>  player_list;
-    private boolean           has_been_saved;
+    public ArrayList<Player>  player_list; 
+    private int               GID;
+    public ArrayList<Integer> player_pids;
+    public ArrayList<Integer> player_pids_at_last_save;
+    public boolean                      expanded_science;
+    public boolean                      leaders_enabled;
+    public boolean                      cities_enabled;
     
     public Game(){
+        player_pids    = new ArrayList<Integer>();
+        player_pids_at_last_save = new ArrayList<Integer>();
         player_list    = new ArrayList<Player>();
         scoring_stages = new ArrayList<STAGE>(Arrays.asList(STAGE.values()));
         scoring_stages.remove(STAGE.RESULTS);
-        scoring_stages.remove(STAGE.PLAYERS);
-        has_been_saved = false;
+        scoring_stages.remove(STAGE.PLAYERS); 
+        setGID(-1);
     }
     
     
@@ -24,10 +35,16 @@ public class Game {
      * Resets all players scores to begin a new game
      *
      */
-    public void newGame(){
-        has_been_saved = false;
+    public void newGame(){ 
+        setGID(-1);
+        player_pids    = new ArrayList<Integer>();
+        player_pids_at_last_save = new ArrayList<Integer>();
         for(Player temp_player : player_list)
+        {
+            player_pids.add(temp_player.pid);
             temp_player.resetScores();
+            temp_player.setRID(-1);
+        }
     }
 
     /**
@@ -48,9 +65,9 @@ public class Game {
      * @param _name   the name of the player
      * @param _wonder the Wonder enum of the player's wonder 
      */
-    public void addPlayer(String _name, WONDER _wonder, Boolean _expanded_science)
+    public void addPlayer(String _name, WONDER _wonder, int _pid, Boolean _expanded_science)
     {
-        player_list.add(new Player(_name, _wonder, _expanded_science));
+        player_list.add(new Player(_name, _wonder, _pid, _expanded_science));
     }
     
     
@@ -189,27 +206,62 @@ public class Game {
         return player_list.get(_index).getStageScore(_stage);
     }
     
+    public String generateExpansionCode()
+    {
+        StringBuilder str  = new StringBuilder();
+
+        if(leaders_enabled)
+            str.append("leaders");
+        
+        if(leaders_enabled && cities_enabled)
+            str.append(",");
+        
+        if(cities_enabled)
+            str.append("cities");
+        
+        return str.toString();
+    }
+    
 
     /**
      * Saves the game results and players to the database
+     * @param dbm 
      *
      */
-    public boolean saveGame()
+    public void saveGame(DatabaseManager dbm)
     {
-        //calls to SQLite helper
-        has_been_saved = true;
-        return has_been_saved;
+        //if hasn't been saved before
+        if(this.getGID() == -1)
+        {
+            Log.d("saveGame", "insertGame");
+            setGID(dbm.insertGame(this));
+            for(Integer pid : player_pids)
+                player_pids_at_last_save.add(pid);
+        }
+        else
+        {
+            ArrayList<Integer> pids_to_remove = new ArrayList<Integer>();
+            for(Integer last_pid : player_pids_at_last_save)
+            {
+                if(!player_pids.contains(last_pid))
+                    pids_to_remove.add(last_pid);
+            }
+            
+            Log.d("saveGame", "modifyGame");
+            dbm.modifyGame(this);
+            
+            for(Integer pid : pids_to_remove)
+            {
+                Log.d("saveGame", "removeResult PID: " + pid + ", GID: "+  GID );
+                dbm.removeResult(pid, GID);
+            }
+            
+            player_pids_at_last_save.clear();
+            for(Integer pid : player_pids)
+                player_pids_at_last_save.add(pid);
+        } 
     }
-
-    /**
-     * To determine if the game's results have been saved
-     *
-     * @return true if the game has been saved, else false
-     */
-    public boolean isSaved() {
-        return has_been_saved;
-    }
-
+ 
 
     public void sortByScores() {
         Collections.sort(player_list, new Comparator<Player>()  {
@@ -222,7 +274,8 @@ public class Game {
     }
 
 
-    public void updatePlayerScienceScoring(boolean expanded_science) {
+    public void updatePlayerScienceScoring(boolean _expanded_science) {
+        expanded_science = _expanded_science;
         for(Player player : player_list)
         {
             player.setExpandedScience(expanded_science);
@@ -232,6 +285,7 @@ public class Game {
 
 
     public void computePlayersScienceScores() {
+        
         for(Player player : player_list)
         {
             player.getSciencePoints();
@@ -248,6 +302,16 @@ public class Game {
             player.setStageScore(debt, 0);
         }
         
+    }
+
+
+    public int getGID() {
+        return GID;
+    }
+
+
+    public void setGID(int gID) {
+        GID = gID;
     }
 
 }

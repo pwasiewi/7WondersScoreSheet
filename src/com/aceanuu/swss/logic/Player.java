@@ -16,15 +16,17 @@ public class Player {
     
     private String              name;
     private WONDER              wonder;
-    private Map<STAGE, Integer> step_scores;
-    private ArrayList<STAGE>    step_wins;
+    public Map<STAGE, Integer> step_scores;
+    public ArrayList<STAGE>    step_wins;
     private int                 total;
     private int                 finishing_place;
     public  int[]               science;
     public  int                 selected_science_index;
     public  boolean             expanded_science;
+    public int pid;
+    public int RID;
     
-    public Player(String _name, WONDER _wonder, boolean _expanded_science) {
+    public Player(String _name, WONDER _wonder, int _pid, boolean _expanded_science) {
         name                      = _name;
         wonder                    = _wonder;
         total                     = 0;
@@ -33,14 +35,30 @@ public class Player {
         step_wins                 = new ArrayList<STAGE>();
         science                   = new int[] {0,0,0,0};
         selected_science_index    = 0;
+        step_scores.put(STAGE.MILITARY, 0); 
         step_scores.put(STAGE.SCIENCE, 0); 
+        step_scores.put(STAGE.CIVILIAN, 0); 
+        step_scores.put(STAGE.COMMERCIAL, 0); 
+        step_scores.put(STAGE.GUILD, 0); 
+        step_scores.put(STAGE.WONDER, 0);
+        step_scores.put(STAGE.MONEY, 0); 
+        step_scores.put(STAGE.RESULTS, 0);  
         expanded_science          = _expanded_science;
+        pid                       = _pid;
+        RID                       = -1;
     }
 
     public void resetScores() {
         step_wins                 = new ArrayList<STAGE>();
         step_scores               = new TreeMap<STAGE, Integer>();
+        step_scores.put(STAGE.MILITARY, 0); 
         step_scores.put(STAGE.SCIENCE, 0); 
+        step_scores.put(STAGE.CIVILIAN, 0); 
+        step_scores.put(STAGE.COMMERCIAL, 0); 
+        step_scores.put(STAGE.GUILD, 0); 
+        step_scores.put(STAGE.WONDER, 0);
+        step_scores.put(STAGE.MONEY, 0); 
+        step_scores.put(STAGE.RESULTS, 0);  
         total                     = 0;
         finishing_place           = 0;
         selected_science_index    = 0;
@@ -60,6 +78,7 @@ public class Player {
         step_wins                 = new ArrayList<STAGE>();
         total                     = 0;
         finishing_place           = 0;
+        step_scores.put(STAGE.RESULTS, 0);
     } 
 
     public void setScienceScore(int value, int CATEGORY) {
@@ -120,6 +139,7 @@ public class Player {
         for(STAGE temp_key : step_scores.keySet()) {
             total += getStageScore(temp_key);
         }
+        step_scores.put(STAGE.RESULTS, total);
     }
 
     public int getTotal(){
@@ -211,6 +231,15 @@ public class Player {
         
         step_scores.put(STAGE.SCIENCE, maxValue);
         return maxValue;
+    }
+
+    public void setRID(int _rid) {
+        RID = _rid; 
+    }
+    
+    public int getRID()
+    {
+        return RID;
     }
 
 }
