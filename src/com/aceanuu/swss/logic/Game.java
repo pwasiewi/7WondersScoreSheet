@@ -20,6 +20,8 @@ public class Game {
     public boolean                      leaders_enabled;
     public boolean                      cities_enabled;
     
+    public boolean                      changed_since_save;
+    
     public Game(){
         player_pids    = new ArrayList<Integer>();
         player_pids_at_last_save = new ArrayList<Integer>();
@@ -28,6 +30,7 @@ public class Game {
         scoring_stages.remove(STAGE.RESULTS);
         scoring_stages.remove(STAGE.PLAYERS); 
         setGID(-1);
+        changed_since_save = true;
     }
     
     
@@ -102,6 +105,8 @@ public class Game {
             temp_player.clearSums();
         determineWinner();
         generateStepWinners();
+        
+        changed_since_save = true;
     }
     
 
@@ -263,6 +268,8 @@ public class Game {
             for(Integer pid : player_pids)
                 player_pids_at_last_save.add(pid);
         } 
+        
+        changed_since_save = false;
     }
  
 
@@ -315,6 +322,11 @@ public class Game {
 
     public void setGID(int gID) {
         GID = gID;
+    }
+
+
+    public boolean changedSinceLastSave() { 
+        return changed_since_save;
     }
 
 }

@@ -418,7 +418,10 @@ public class ScoreSheet extends SherlockActivity {
         
         switch (item.getItemId()) {
             case R.id.ab_newgame_item:
-                showResetScores();
+                if(current_game.changedSinceLastSave())
+                    resultsNotSavedPrompt();
+                else
+                    showResetScores();
                 return true;
             case R.id.ab_addplayer_item:
                 addPlayerPrompt();
@@ -494,6 +497,7 @@ public class ScoreSheet extends SherlockActivity {
     private void showResetScores() {  
         Dialog temp = new AlertDialog.Builder(this)
         .setTitle("Score a new game?")
+        .setIcon(this.getResources().getDrawable(R.drawable.navigation_refresh))
         .setPositiveButton("New Game",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -518,10 +522,11 @@ public class ScoreSheet extends SherlockActivity {
     private void showSaveScore() {
         Dialog temp = new AlertDialog.Builder(this)
         .setTitle("Save Scores?")
+        .setIcon(this.getResources().getDrawable(R.drawable.result_save))
         .setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        saveOrUpdateGameScore();
+                    public void onClick(DialogInterface dialog, int which) { 
+                        current_game.saveGame(dbm);
                     }
                 })
         .setNegativeButton("Cancel",
@@ -540,12 +545,7 @@ public class ScoreSheet extends SherlockActivity {
     }
 
     
-
-
-    private void saveOrUpdateGameScore() {
-        current_game.saveGame(dbm);
-    }
-    
+ 
     
     /**
      * Called when user wants to start scoring a new game
@@ -587,11 +587,13 @@ public class ScoreSheet extends SherlockActivity {
     private void resultsNotSavedPrompt() {
         Dialog temp = new AlertDialog.Builder(this)
         .setTitle("Results not Saved")
+        .setIcon(this.getResources().getDrawable(R.drawable.alert_stop))
         .setMessage("Results for this game have not been saved.")
         .setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        current_game.saveGame(dbm);
+                        current_game.saveGame(dbm); 
+                        showResetScores();
                     }
                 })
         .setNegativeButton("Don't Save",
@@ -726,6 +728,9 @@ public class ScoreSheet extends SherlockActivity {
                 }
             }
         });
+        
+        alert.setIcon(this.getResources().getDrawable(R.drawable.content_new));
+        
         alert.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
