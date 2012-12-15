@@ -1,5 +1,7 @@
 package com.aceanuu.swss.logic;
 
+import android.util.Log;
+
 public enum STAGE {
     PLAYERS, MILITARY, MONEY, DEBT, WONDER, CIVILIAN, COMMERCIAL, SCIENCE, GUILD,  LEADERS,  CITIES, RESULTS;
     
@@ -93,5 +95,38 @@ public enum STAGE {
         if(result == null)
             throw new IllegalArgumentException();
         return result;
+    }
+    
+
+    public static STAGE convertStringToEnum(String enum_text)
+    {
+        Log.d("convertStringToEnum", enum_text);
+        enum_text = enum_text.toUpperCase(); 
+        if(enum_text.equals("PLAYERS")) 
+            return STAGE.PLAYERS; 
+        if(enum_text.equals("MILITARY")) 
+            return STAGE.MILITARY; 
+        if(enum_text.equals("MONEY")) 
+            return STAGE.MONEY; 
+        if(enum_text.equals("WONDER")) 
+            return STAGE.WONDER; 
+        if(enum_text.equals("CIVILIAN")) 
+            return STAGE.CIVILIAN;
+        if(enum_text.equals("COMMERCIAL")) 
+            return STAGE.COMMERCIAL;
+        if(enum_text.equals("GUILD") || enum_text.equals("GUILDS")) 
+            return STAGE.GUILD;
+        if(enum_text.equals("SCIENCE")) 
+            return STAGE.SCIENCE;
+        if(enum_text.equals("LEADERS")) 
+            return STAGE.LEADERS;
+        if(enum_text.equals("DEBT")) 
+            return STAGE.DEBT;
+        if(enum_text.equals("CITIES")) 
+            return STAGE.CITIES;
+        if(enum_text.equals("RESULTS")) 
+            return STAGE.RESULTS;
+
+        throw new IllegalArgumentException();
     }
 }

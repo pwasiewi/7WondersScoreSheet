@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TabHost
+        android:id="@android:id/tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </TabWidget>
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+		
+		    <LinearLayout
+		        android:id="@+id/chart"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_marginBottom="8dp"
+		        android:layout_marginTop="8dp"
+		        android:layout_weight="1"
+		        android:background="#bbb"
+		        android:orientation="horizontal" />
+		
+		    <LinearLayout
+		        android:id="@+id/chart2"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_marginBottom="8dp"
+		        android:layout_marginTop="8dp"
+		        android:layout_weight="1"
+		        android:background="#ccc"
+		        android:orientation="horizontal" /> 
+            <RelativeLayout
+                android:id="@+id/player_tab"
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+			    android:orientation="vertical"
+			    android:paddingBottom="8dp"
+			    android:paddingLeft="8dp"
+			    android:paddingRight="8dp"
+			    android:paddingTop="8dp" >
+			
+			    <TextView
+			        android:id="@+id/num_label"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignParentLeft="true"
+			        android:layout_alignParentTop="true"
+			        android:text="Number of Players"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			
+			    <TextView
+			        android:id="@+id/tab_player_number"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignParentLeft="true"
+			        android:layout_below="@+id/num_label"
+			        android:layout_marginLeft="20dp"
+			        android:text="8" />
+			
+			    <TextView
+			        android:id="@+id/ave_games"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignParentLeft="true"
+			        android:layout_below="@+id/tab_player_number"
+			        android:layout_marginTop="10dp"
+			        android:text="Average Games per Player"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			
+			    <TextView
+			        android:id="@+id/tab_player_average_games_per_player"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/ave_games"
+			        android:layout_marginLeft="20dp"
+			        android:text="3" />
+			
+			
+			
+			    <TextView
+			        android:id="@+id/winningest"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignParentLeft="true"
+			        android:layout_below="@+id/tab_player_average_games_per_player"
+			        android:layout_marginTop="10dp"
+			        android:text="Most Winning Player"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			
+			
+			
+			
+			    <TextView
+			        android:id="@+id/tab_player_winningest"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/winningest"
+			        android:layout_marginLeft="20dp"
+			        android:text="Chris" />
+			
+			
+			
+			
+			    <TextView
+			        android:id="@+id/TextView02"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignLeft="@+id/winningest"
+			        android:layout_below="@+id/tab_player_winningest"
+			        android:layout_marginTop="10dp"
+			        android:text="Best Player (W:L ratio)"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			
+			
+			    <TextView
+			        android:id="@+id/tab_player_best"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignLeft="@+id/tab_player_winningest"
+			        android:layout_below="@+id/TextView02"
+			        android:text="Aceanuu" />
+			
+			    <TextView
+			        android:id="@+id/TextView03"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_alignLeft="@+id/winningest"
+			        android:layout_below="@+id/tab_player_best"
+			        android:layout_marginTop="10dp"
+			        android:text="Info Dump Player"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+			
+			
+			    <Spinner
+			        android:id="@+id/tab_player_select_player"
+			        android:layout_width="wrap_content"
+			        android:layout_height="30dp"
+			        android:layout_alignLeft="@+id/tab_player_winningest"
+			        android:layout_below="@+id/TextView03"  />
+			<ScrollView
+			        android:layout_width="fill_parent"
+			        android:layout_height="fill_parent"
+			        android:layout_alignLeft="@+id/tab_player_winningest"
+			        android:layout_below="@id/tab_player_select_player"
+			    >
+			    <TextView
+			        android:id="@+id/tab_player_info"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:text="Aceanuu" />
+			    </ScrollView>
+                
+            </RelativeLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+
+
+</LinearLayout>

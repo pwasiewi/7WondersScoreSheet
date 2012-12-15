@@ -1,6 +1,7 @@
 package com.aceanuu.swss.sqlite;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,6 +13,8 @@ import android.util.Log;
 import com.aceanuu.swss.logic.Game;
 import com.aceanuu.swss.logic.Player;
 import com.aceanuu.swss.logic.STAGE;
+import com.aceanuu.swss.stats.GameStat;
+import com.aceanuu.swss.stats.PlayerStat;
 
 //copy database 
 //adb shell
@@ -32,7 +35,7 @@ public class DatabaseManager extends SQLiteOpenHelper  {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 28;
+    private static final int DATABASE_VERSION = 29;
  
     // Database Name
     private static final String DATABASE_NAME = "SEVEN_WONDERS_SCORE_SHEET_DATABASE";
@@ -58,7 +61,7 @@ public class DatabaseManager extends SQLiteOpenHelper  {
         private static final String RTIME        = "TIME";
         
     private static final String TABLE_SCORE      = "SCORE";
-        private static final String SGAMEID          = "SGAMEID";
+        private static final String SGAMEID      = "GID";
         private static final String SSCOREID     = "SID";
         private static final String SRESULTSID   = "RID";
         private static final String SPLAYERID    = "PID";
@@ -523,5 +526,98 @@ public class DatabaseManager extends SQLiteOpenHelper  {
 
 
 
+    
+    
+    
+    public PlayerStat getPlayerHistory(String pname, int pid)
+    {
+        String query  = "SELECT R.TOTAL, R.POSITION, S.GID, S.CATEGORY, " +
+        		        "S.SCORE, S.MEDAL, S.RID " +
+        		        "FROM PLAYER P, RESULT R, GAME G, SCORE S " +
+        		        "WHERE P.PID = 3 AND R.GID = G.GID AND S.RID = R.RID AND R.PID = P.PID";
+
+//        String query  = "SELECT * FROM " + TABLE_PLAYER + " P, " 
+//                                         + TABLE_RESULT + " R, " 
+//                                         + TABLE_GAME   + " G, "
+//                                         + TABLE_SCORE  + " S, " 
+//                                         + " WHERE P.PID = " + pid + " AND R.PID = " + pid 
+//                                         + " AND S.RID = R.RID AND R.PID = P.PID AND S.CATEGORY = "RESULTS"
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        PlayerStat ps = new PlayerStat(pname, pid);
+
+        Log.d("insertPlayer", "insertPlayer");
+        Cursor row = db.rawQuery(query, null);
+        if(row.getCount() > 0)
+            if (row.moveToFirst()){
+                do
+                {    
+                    for(int i = 0; i < 6; i++)
+                        Log.d("PlayerStat", "colname for " + i + " : " + row.getColumnName(i));
+                    int rid      = row.getInt(row.getColumnIndex("RID")); 
+                    int gid      = row.getInt(row.getColumnIndex("GID")); 
+                   
+                    int position = row.getInt(row.getColumnIndex("POSITION")); 
+                    int total    = row.getInt(row.getColumnIndex("TOTAL"));  
+                    int score    = row.getInt(row.getColumnIndex("SCORE"));
+                    int medal    = row.getInt(row.getColumnIndex("MEDAL")); 
+                    String cat   = row.getString(row.getColumnIndex("CATEGORY"));
+                    
+                    GameStat gs;
+                    
+                    //if game is already listed
+                    if(ps.game_list.containsKey(gid))
+                    {
+                        gs = ps.game_list.get(gid);
+                    }
+                    //if game is not already in playerstat
+                    else
+                    {
+                        gs = new GameStat();
+                        ps.game_list.put(gid, gs);
+                        gs.rid = rid;
+                        gs.pid = pid;
+                        gs.gid = gid;
+                        gs.position = position;
+                        gs.total    = total; 
+                    }
+                    
+                    STAGE stage = STAGE.convertStringToEnum(cat);
+                    gs.step_scores.put(stage, score);
+                    if(medal == 1)
+                        gs.step_wins.add(stage);
+                } while(row.moveToNext());  
+            } 
+        
+        return ps;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public HashMap<String, Integer> getPlayerNamePIDs()
+    {
+        SQLiteDatabase db       = this.getReadableDatabase(); 
+        HashMap<String, Integer> names = new HashMap<String, Integer>();
+
+        String query  = "SELECT " + PNAME + ", " + PID + " FROM " + TABLE_PLAYER;
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()){
+            do
+            {    
+                names.put( cursor.getString(cursor.getColumnIndex(PNAME)), cursor.getInt(cursor.getColumnIndex(PID))); 
+            } while(cursor.moveToNext());  
+        }
+        return names;
+    }
+    
 
 }

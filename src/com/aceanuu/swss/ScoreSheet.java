@@ -60,6 +60,7 @@ import com.aceanuu.swss.logic.Game;
 import com.aceanuu.swss.logic.STAGE;
 import com.aceanuu.swss.logic.WONDER;
 import com.aceanuu.swss.sqlite.DatabaseManager;
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -244,7 +245,37 @@ public class ScoreSheet extends SherlockActivity {
      * Configures and initializes app's necessary UI components
      */
     public void initializeViews() {
-        getSupportActionBar().setTitle("Score Sheet");
+        final ActionBar ab = getSupportActionBar();
+        //ab.setTitle("Score Sheet");
+
+        ab.setDisplayShowTitleEnabled(false);
+        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        
+        final ArrayList<String> modes = new ArrayList<String>();
+        modes.add(this.getResources().getString(R.string.ab_modes_scoresheet));
+        modes.add(this.getResources().getString(R.string.ab_modes_stats));
+        ArrayAdapter<String> aa = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                modes);
+        ab.setListNavigationCallbacks(aa, new ActionBar.OnNavigationListener() {
+            
+            @Override
+            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                int x = 0;
+                if(itemPosition == 0)  //if score sheet
+                    x = 0;           //do nothing
+                else if(itemPosition == 1) //if other thing
+                {
+                    startStats();
+                    //ab.setSelectedNavigationItem(0);
+                }
+                
+                
+                return false;
+            }
+
+        });
         
         factory          = LayoutInflater.from(this);
         viewPager        = (CustomViewPager) findViewById(R.id.awesomepager);
@@ -254,6 +285,13 @@ public class ScoreSheet extends SherlockActivity {
         viewPager.setChildId(0);
     }
 
+
+    private void startStats() {
+        Intent intent = new Intent(this, Stats.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+//        overridePendingTransition(0,0);
+    }
     
     /**
      * Called on app creation.
@@ -437,6 +475,8 @@ public class ScoreSheet extends SherlockActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) { 
 
+        getSupportActionBar().setSelectedNavigationItem(0);
+        
         boolean previous_science = current_game.expanded_science;
         boolean previous_leader  = current_game.leaders_enabled;
         boolean previous_cities  = current_game.cities_enabled;
