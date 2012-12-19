@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aceanuu.swss"
+<<<<<<< HEAD
     android:versionCode="231"
     android:versionName="2.9.1" >
+=======
+    android:versionCode="226"
+    android:versionName="2.8.9" >
+>>>>>>> 82c5978aa432a80afc6e9f91ec7b3e7fa627fb53
 	    
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     
@@ -34,6 +39,7 @@
 		       <category android:name="android.intent.category.DEFAULT" />
 		    </intent-filter>
 		</activity>
+<<<<<<< HEAD
 		
 		<activity android:name=".Stats"
 	        android:label="Stats" 
@@ -43,6 +49,8 @@
 	            android:name="android.support.PARENT_ACTIVITY"
 	            android:value="com.aceanuu.swss.ScoreSheet" />
 	    </activity>
+=======
+>>>>>>> 82c5978aa432a80afc6e9f91ec7b3e7fa627fb53
         
     </application>
 
