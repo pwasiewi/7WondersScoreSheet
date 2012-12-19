@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/ab_newgame_item"
+		android:title="@string/ab_newgame"
+		android:showAsAction="always"
+		android:icon="@drawable/navigation_refresh" />
+	
+	<item android:id="@+id/ab_addplayer_item"
+		android:title="@string/ab_addplayer"
+		android:showAsAction="always"
+		android:icon="@drawable/content_new" />
+	
+	<item android:id="@+id/ab_settings_item"
+		android:title="@string/ab_settings"
+		android:showAsAction="never"
+		android:icon="@drawable/action_settings" />
+</menu>

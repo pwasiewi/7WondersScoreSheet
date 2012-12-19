@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+	 <PreferenceCategory 
+	        android:title="@string/settings_expansions_title"
+	        android:key="settings_expansions">
+	    <CheckBoxPreference
+	        android:defaultValue="true"
+	        android:key="@string/settings_expansions_leaders_key"
+	        android:summary="@string/settings_expansions_leaders_summary"
+	        android:title="@string/settings_expansions_leaders_title" />
+	    <CheckBoxPreference
+	        android:defaultValue="true"
+	        android:key="@string/settings_expansions_cities_key"
+	        android:summary="@string/settings_expansions_cities_summary"
+	        android:title="@string/settings_expansions_cities_title" />
+	</PreferenceCategory>
+	<PreferenceCategory 
+	        android:title="@string/settings_expanded_title"
+	        android:key="settings_expanded">
+	    <CheckBoxPreference
+	        android:defaultValue="true"
+	        android:key="@string/settings_expanded_science_key"
+	        android:summary="@string/settings_expanded_science_summary"
+	        android:title="@string/settings_expanded_science_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

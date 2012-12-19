@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:paddingTop="4dp"
+	android:paddingBottom="4dp"
+    android:paddingRight="10dp"
+    android:paddingLeft="10dp"
+	android:minHeight="46dp"
+	android:orientation="horizontal">
+		<TextView
+		    android:layout_centerVertical="true"
+		    android:layout_alignParentLeft="true"
+	        android:id="@+id/playerName"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+		    android:text="Player_Name"/>      
+		<CheckBox
+	        android:id="@+id/removePlayerCheck"
+		    android:layout_centerVertical="true"
+		    android:layout_alignParentRight="true"
+			android:layout_marginLeft="10dp"
+			android:layout_width="31dp"
+			android:layout_height="46dp" />
+		<TextView
+			android:gravity="right"
+            android:shadowDy="3" 
+		    android:layout_toLeftOf="@id/removePlayerCheck"
+		    android:layout_centerVertical="true"
+	        android:id="@+id/wonderName"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"			
+		    android:text="Wonder_Name"/>    
+</RelativeLayout>
