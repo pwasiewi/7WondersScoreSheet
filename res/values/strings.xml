@@ -40,9 +40,11 @@
     <string name="ab_modes_scoresheet">Score Sheet</string>
     <string name="ab_modes_stats">Stats</string> 
     
-    
-    
-    
+   
+    <string-array name="action_bar_nav">
+        <item>Score Sheet</item>
+        <item>Stats</item>
+    </string-array>
     
     
     

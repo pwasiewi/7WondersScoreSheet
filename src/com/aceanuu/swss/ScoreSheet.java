@@ -61,7 +61,6 @@ import com.aceanuu.swss.logic.STAGE;
 import com.aceanuu.swss.logic.WONDER;
 import com.aceanuu.swss.sqlite.DatabaseManager;
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -84,7 +83,6 @@ public class ScoreSheet extends SherlockFragment {
     private LinearLayout                 results_sort_click;
     
     private LayoutInflater               factory;
-    private Context                      ctx;
 
     private WONDER[]                     wonder_list;
     private String[]                     tab_titles;
@@ -120,6 +118,28 @@ public class ScoreSheet extends SherlockFragment {
     ArrayList<String> player_names;
     boolean addedNewPlayerSinceLastNameCache; 
     
+    RelativeLayout fragRoot;
+    
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+    	
+    	fragRoot = (RelativeLayout) inflater.inflate(R.layout.main_ui, null);
+        initializeData();
+        factory = inflater;
+        viewPager        = (CustomViewPager) fragRoot.findViewById(R.id.awesomepager);
+
+        pagerAdapter     = new SevenWonderAdapter();
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setChildId(0);
+        
+        initializeListeners();
+        loadPrevPlayers();
+        
+        
+    	return fragRoot;
+    }
     
     /**
      * Called on app creation.
@@ -128,11 +148,11 @@ public class ScoreSheet extends SherlockFragment {
     public void initializeData() {
         current_game = new Game();
         tab_titles   = getResources().getStringArray(R.array.tabs); 
-        prefs        = getSharedPreferences(PREF_KEY, MODE_PRIVATE); 
+        prefs        = getActivity().getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE); 
 
-        science_key = getApplicationContext().getResources().getString(R.string.settings_expanded_science_key);
-        leaders_key = getApplicationContext().getResources().getString(R.string.settings_expansions_leaders_key);
-        cities_key  = getApplicationContext().getResources().getString(R.string.settings_expansions_cities_key);
+        science_key = getResources().getString(R.string.settings_expanded_science_key);
+        leaders_key = getResources().getString(R.string.settings_expansions_leaders_key);
+        cities_key  = getResources().getString(R.string.settings_expansions_cities_key);
         
         current_game.expanded_science = prefs.getBoolean(science_key, true);
         current_game.leaders_enabled  = prefs.getBoolean(leaders_key, true);
@@ -155,7 +175,6 @@ public class ScoreSheet extends SherlockFragment {
         nameAdapter  = new PlayerAdapter();
         sumAdapter   = new SumAdapter();
 
-        ctx          = this.getApplicationContext();
 
         
         final float scale = getResources().getDisplayMetrics().density;
@@ -170,7 +189,7 @@ public class ScoreSheet extends SherlockFragment {
         wonder_list   = WONDER.values();
         
         buildStages();
-        dbm = new DatabaseManager(this);
+        dbm = new DatabaseManager(getActivity().getApplicationContext());
         
         //STUFF FOR EXPANDED SCIENCE
 //        if(expanded_science)
@@ -241,67 +260,16 @@ public class ScoreSheet extends SherlockFragment {
     }
 
 
-    /**
-     * Called on app creation.
-     * Configures and initializes app's necessary UI components
-     */
-    public void initializeViews() {
-        final ActionBar ab = getSupportActionBar();
-        //ab.setTitle("Score Sheet");
 
-        ab.setDisplayShowTitleEnabled(false);
-        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        
-        final ArrayList<String> modes = new ArrayList<String>();
-        modes.add(this.getResources().getString(R.string.ab_modes_scoresheet));
-        modes.add(this.getResources().getString(R.string.ab_modes_stats));
-        ArrayAdapter<String> aa = new ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                modes);
-        ab.setListNavigationCallbacks(aa, new ActionBar.OnNavigationListener() {
-            
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                int x = 0;
-                if(itemPosition == 0)  //if score sheet
-                    x = 0;           //do nothing
-                else if(itemPosition == 1) //if other thing
-                {
-                    startStats();
-                    //ab.setSelectedNavigationItem(0);
-                }
-                
-                
-                return false;
-            }
-
-        });
-        
-        factory          = LayoutInflater.from(this);
-        viewPager        = (CustomViewPager) findViewById(R.id.awesomepager);
-
-        pagerAdapter     = new SevenWonderAdapter();
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.setChildId(0);
-    }
-
-
-    private void startStats() {
-        Intent intent = new Intent(this, Stats.class);
-        startActivity(intent);
-        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-//        overridePendingTransition(0,0);
-    }
     
     /**
      * Called on app creation.
      * Configures and initializes app's necessary UI listeners and hooks
      */    
     public void initializeListeners() {
-        final LinearLayout players_bar      = (LinearLayout)   this.findViewById(R.id.create_bottom_bar);
-        final LinearLayout results_bar      = (LinearLayout)   this.findViewById(R.id.results_bottom_bar);
-        final LinearLayout bottom_container = (LinearLayout)   this.findViewById(R.id.bottom_bar);
+        final LinearLayout players_bar      = (LinearLayout) fragRoot.findViewById(R.id.create_bottom_bar);
+        final LinearLayout results_bar      = (LinearLayout) fragRoot.findViewById(R.id.results_bottom_bar);
+        final LinearLayout bottom_container = (LinearLayout) fragRoot.findViewById(R.id.bottom_bar);
 
         players_wonder_click     = (LinearLayout) players_bar.findViewById(R.id.players_wonder_ll);
         players_remove_click   = (LinearLayout) players_bar.findViewById(R.id.players_remove_ll);
@@ -310,7 +278,7 @@ public class ScoreSheet extends SherlockFragment {
 //        results_savegame_click = (LinearLayout) results_bar.findViewById(R.id.results_save_ll);
         results_sort_click = (LinearLayout) results_bar.findViewById(R.id.results_sort_ll);
         
-        tabInd = (TabPageIndicator) findViewById(R.id.indicatorzulu);
+        tabInd = (TabPageIndicator) fragRoot.findViewById(R.id.indicatorzulu);
         tabInd.setViewPager(viewPager);
         
         tabInd.setOnPageChangeListener(new OnPageChangeListener() {
@@ -333,7 +301,7 @@ public class ScoreSheet extends SherlockFragment {
                     players_bar.setVisibility(View.GONE);
                     results_bar.setVisibility(View.VISIBLE);
                     
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager)getActivity().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(tabInd.getWindowToken(), 0);
                 }
                 else if (this_stage == STAGE.PLAYERS) 
@@ -359,7 +327,7 @@ public class ScoreSheet extends SherlockFragment {
                 if(!nameAdapter.editMode)
                 {
                     nameAdapter.toggleEditMode();
-                    Button edit_button = (Button) findViewById(R.id.edit_wonder_button);
+                    Button edit_button = (Button) fragRoot.findViewById(R.id.edit_wonder_button);
                     edit_button.setText(R.string.change_selected_prompt);
                     players_remove_click.setEnabled(false);
                 }
@@ -367,7 +335,7 @@ public class ScoreSheet extends SherlockFragment {
                 {
                     nameAdapter.commitSelectedWonders();
                     nameAdapter.toggleEditMode();
-                    Button edit_button = (Button) findViewById(R.id.edit_wonder_button);
+                    Button edit_button = (Button) fragRoot.findViewById(R.id.edit_wonder_button);
                     edit_button.setText(R.string.change_wonder_prompt);
                     players_remove_click.setEnabled(true);
                 }
@@ -382,7 +350,7 @@ public class ScoreSheet extends SherlockFragment {
                 {
                     nameAdapter.toggleRemoveMode();
                     
-                    Button remove_button = (Button) findViewById(R.id.remove_player_button);
+                    Button remove_button = (Button) fragRoot.findViewById(R.id.remove_player_button);
                     remove_button.setText(R.string.remove_selected_prompt);
                     players_wonder_click.setEnabled(false);
                 }
@@ -391,7 +359,7 @@ public class ScoreSheet extends SherlockFragment {
                     nameAdapter.removeSelected();
                     nameAdapter.toggleRemoveMode();
                     
-                    Button remove_button = (Button) findViewById(R.id.remove_player_button);
+                    Button remove_button = (Button) fragRoot.findViewById(R.id.remove_player_button);
                     remove_button.setText(R.string.remove_players_prompt);
                     players_wonder_click.setEnabled(true);
                 }
@@ -418,33 +386,32 @@ public class ScoreSheet extends SherlockFragment {
         });   
     }
     
-    
-    /**
-     * Called on app creation.
-     * Calls all necessary initializer methods to get app into starting state
-     */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_ui);
-        initializeData();
-        initializeViews();
-        initializeListeners();
-        loadPrevPlayers();
-        
-
-    }
-    
+//    
+//    /**
+//     * Called on app creation.
+//     * Calls all necessary initializer methods to get app into starting state
+//     */
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.main_ui);
+//        initializeData();
+//        initializeViews();
+//        initializeListeners();
+//        loadPrevPlayers();
+//        
+//
+//    }
+//    
 
     /**
      * Called on app creation.
      * Create menu options for primary actionbar
      */
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        MenuInflater inflater = getSupportMenuInflater();
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.options_menu, menu);
-        return true;
     }
 
 
@@ -466,18 +433,15 @@ public class ScoreSheet extends SherlockFragment {
                 addPlayerPrompt();
                 return true;
             case R.id.ab_settings_item:
-                startActivityForResult(new Intent(this, Settings.class), 0); 
+//                startActivityForResult(new Intent(getActivity().getApplicationContext(), Settings.class), 0); 
                 return true;
         }
         return false;
     }
     
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) { 
-
-        getSupportActionBar().setSelectedNavigationItem(0);
-        
+    public void updateAfterSettings(){ 
+    	
         boolean previous_science = current_game.expanded_science;
         boolean previous_leader  = current_game.leaders_enabled;
         boolean previous_cities  = current_game.cities_enabled;
@@ -536,7 +500,7 @@ public class ScoreSheet extends SherlockFragment {
 
 
     private void showResetScores() {  
-        Dialog temp = new AlertDialog.Builder(this)
+        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
         .setTitle("Score a new game?")
         .setIcon(this.getResources().getDrawable(R.drawable.navigation_refresh))
         .setPositiveButton("New Game",
@@ -561,7 +525,7 @@ public class ScoreSheet extends SherlockFragment {
     }
 
     private void showSaveScore() {
-        Dialog temp = new AlertDialog.Builder(this)
+        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
         .setTitle("Save Scores?")
         .setIcon(this.getResources().getDrawable(R.drawable.result_save))
         .setPositiveButton("Save",
@@ -603,21 +567,6 @@ public class ScoreSheet extends SherlockFragment {
     }
 
 
-    /**
-     * Called when user wants to cease modifying player configuration
-     * Exit edit states on user properties
-     */
-//    private void finishPlayerEdits() {
-//        if(nameAdapter.editMode)
-//        {
-//            nameAdapter.commitSelectedWonders();
-//            nameAdapter.toggleEditMode();
-//        }
-//        else if(nameAdapter.removeMode)
-//        {
-//            nameAdapter.removeSelected();
-//            nameAdapter.toggleRemoveMode();
-//        } 
 //    }
 
 
@@ -626,7 +575,7 @@ public class ScoreSheet extends SherlockFragment {
      * Prompts the user to either save or continue without save
      */
     private void resultsNotSavedPrompt() {
-        Dialog temp = new AlertDialog.Builder(this)
+        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
         .setTitle("Results not Saved")
         .setIcon(this.getResources().getDrawable(R.drawable.alert_stop))
         .setMessage("Results for this game have not been saved.")
@@ -693,7 +642,7 @@ public class ScoreSheet extends SherlockFragment {
     
     public void loadPrevPlayers()
     {
-        prefs        = getSharedPreferences(PREF_KEY, MODE_PRIVATE); 
+        prefs = getActivity().getApplicationContext().getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE); 
         
         Log.w("loadPrevPlayers", "BEGIN loadPrevPlayers ----------------------------------"); 
         String prev_player_string = prefs.getString(PREFS_PREV_PLAYER_KEY, PREFS_PREV_NOTHING);
@@ -727,7 +676,7 @@ public class ScoreSheet extends SherlockFragment {
      * Displays the necessary prompt to capture data necessary for a new player to be made
      */
     private void addPlayerPrompt() {
-        final AlertDialog.Builder alert      = new AlertDialog.Builder(this);
+        final AlertDialog.Builder alert      = new AlertDialog.Builder(getActivity().getApplicationContext());
         final View playerPromptView          = factory.inflate(R.layout.player_dialog, null);
         final Spinner spinnerWonder          = (Spinner) playerPromptView.findViewById(R.id.wonder_spinner);
         final AutoCompleteTextView inputName = (AutoCompleteTextView) playerPromptView.findViewById(R.id.player_name);
@@ -737,7 +686,7 @@ public class ScoreSheet extends SherlockFragment {
             player_names = dbm.getPlayerNames(); 
 //        }
         
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_dropdown_item_1line, player_names);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(),android.R.layout.simple_dropdown_item_1line, player_names);
         
         inputName.setAdapter(adapter);
         
@@ -749,7 +698,7 @@ public class ScoreSheet extends SherlockFragment {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager)getActivity().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(inputName.getWindowToken(), 0);
                 return false;
             }
@@ -764,7 +713,7 @@ public class ScoreSheet extends SherlockFragment {
                 }
                 else 
                 {
-                    Toast.makeText(ctx, "Must Enter a Player Name",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "Must Enter a Player Name",Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
             }
@@ -820,7 +769,7 @@ public class ScoreSheet extends SherlockFragment {
     private void promptForOverride(final String name, final WONDER wonder, final  int pid, final  boolean expanded_science) { 
         final DatabaseManager dbm_final = dbm;
         
-        Dialog temp = new AlertDialog.Builder(this)
+        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
         .setTitle("Name Conflict")
         .setMessage("There is a previously deteleted player named " + name + ".")
         .setPositiveButton("Resume Existing",
@@ -833,7 +782,7 @@ public class ScoreSheet extends SherlockFragment {
             new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog,int whichButton) {
 
-                    Toast.makeText(ctx, "Try again. Each player must have a unique name.",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "Try again. Each player must have a unique name.",Toast.LENGTH_LONG).show();
                 }
             }).create();
         
@@ -921,7 +870,7 @@ public class ScoreSheet extends SherlockFragment {
                 {
                     nameAdapter.commitSelectedWonders();
                     nameAdapter.toggleEditMode();
-                    Button edit_button = (Button) findViewById(R.id.edit_wonder_button);
+                    Button edit_button = (Button) fragRoot.findViewById(R.id.edit_wonder_button);
                     edit_button.setText(R.string.change_wonder_prompt);
                     players_remove_click.setEnabled(true);
                 }
@@ -1564,7 +1513,7 @@ public class ScoreSheet extends SherlockFragment {
             {
                 if(stage_medals.containsKey(step_won))
                 {
-                    ImageView tempIV     = new ImageView(ctx);
+                    ImageView tempIV     = new ImageView(getActivity().getApplicationContext());
                     Bitmap bmp           = ((BitmapDrawable)stage_medals.get(step_won)).getBitmap();
                     Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp, dp28, dp28, true);
                     tempIV.setImageBitmap(resizedbitmap);
