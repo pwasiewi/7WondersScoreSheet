@@ -1,0 +1,21 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:id="@+id/stats_main">
+    <com.viewpagerindicator.TabPageIndicator
+        android:id="@+id/stats_tabs"
+        android:layout_height="48dp"
+        android:layout_width="match_parent"
+        android:textColor="#FFFF" 
+        android:shadowColor="#000000" 
+        android:shadowRadius="2"  
+        android:shadowDx="1"
+        android:shadowDy="3" 
+        android:layout_alignParentTop="true"/>
+    <com.aceanuu.swss.CustomViewPager
+        android:layout_below="@id/stats_tabs"
+	    android:layout_height="match_parent"
+	    android:layout_width="match_parent" 
+	    android:id="@+id/stats_pager"/>
+</RelativeLayout>

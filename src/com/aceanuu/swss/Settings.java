@@ -1,18 +1,14 @@
 package com.aceanuu.swss;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-public class Settings extends PreferenceActivity {
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
+
+public class Settings extends SherlockPreferenceActivity {
 
     private final static String PREF_KEY = "seven_wonders_score_sheet_preferences";
     private SharedPreferences prefs;
@@ -22,6 +18,8 @@ public class Settings extends PreferenceActivity {
 		getPreferenceManager().setSharedPreferencesName(PREF_KEY); 
 		addPreferencesFromResource(R.xml.preferences);
 		prefs = getSharedPreferences(PREF_KEY, MODE_PRIVATE); 
+		
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //		
 //		final EditTextPreference playerNamePref = (EditTextPreference) findPreference("player_name");
 //		
@@ -68,5 +66,17 @@ public class Settings extends PreferenceActivity {
             } 
         });
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
 
+	    case android.R.id.home:
+	         finish();
+	         return true;
+
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
 }

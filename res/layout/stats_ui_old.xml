@@ -46,6 +46,7 @@
 		        android:background="#ccc"
 		        android:orientation="horizontal" /> 
             <RelativeLayout
+                android:background="#bbb"
                 android:id="@+id/player_tab"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
@@ -165,6 +166,11 @@
 			        android:layout_height="wrap_content"
 			        android:text="Aceanuu" />
 			    </ScrollView>
+			    <TextView
+			        android:id="@+id/tab_player_info"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:text="Aceanuu" />
                 
             </RelativeLayout>
             </FrameLayout>

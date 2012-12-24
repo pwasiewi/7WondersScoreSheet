@@ -17,20 +17,19 @@ public class SevenWondersScoreSheetMain extends SherlockFragmentActivity {
 	FragmentManager fragmentManager;
 	public final String SCORESHEET_TAG = "SS_FRAG";
 	public final String STAT_TAG = "STAT_FRAG";
+	private ScoreSheet ss_frag;
+	private Stats      stats_frag;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		Log.i("onCreate main shit", "begin");
         setContentView(R.layout.fragmenthost);
 
-		Log.i("onCreate main shit", "1");
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayShowTitleEnabled(false);
 		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-		Log.i("onCreate main shit", "2");
 		SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.action_bar_nav, android.R.layout.simple_spinner_dropdown_item);
 		OnNavigationListener actionBarListNavListener = new OnNavigationListener() {
 		    boolean firstRun = false;
@@ -43,46 +42,53 @@ public class SevenWondersScoreSheetMain extends SherlockFragmentActivity {
 					firstRun = true;
 					return false;
 				}
-				
+
+			    
 		        if(itemPosition == 0) 
 		        {
-		        	return true;
+				    // Create new fragment from our own Fragment class
+			        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				    // Replace whatever is in the fragment container with this fragment
+				    //  and give the fragment a tag name equal to the string at the position selected
+			        fragmentTransaction.replace(R.id.fragment_container, ss_frag, SCORESHEET_TAG);
+				    // Apply changes
+			        fragmentTransaction.commit();
+				    return true;
 		        }
 		        	
 		        if(itemPosition == 1) //if other thing
 		        {
-		        	return true;
+				    // Create new fragment from our own Fragment class
+			        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				    // Replace whatever is in the fragment container with this fragment
+				    //  and give the fragment a tag name equal to the string at the position selected
+			        fragmentTransaction.replace(R.id.fragment_container, stats_frag, STAT_TAG);
+				    // Apply changes
+			        fragmentTransaction.commit();
+				    return true;
 		        }
 		        
 		        return false;
 		    }
 		};
 
-		Log.i("onCreate main shit", "3");
 		ab.setListNavigationCallbacks(mSpinnerAdapter, actionBarListNavListener);
 
-		if(savedInstanceState == null) {
-	        fragmentManager = getSupportFragmentManager();
-			Log.i("onCreate main shit", "4");
-	        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-			Log.i("onCreate main shit", "5");
-	        ScoreSheet ssfrag = new ScoreSheet();
-			Log.i("onCreate main shit", "6");
-	        ssfrag.setHasOptionsMenu(true);
-			Log.i("onCreate main shit", "7");
-	        fragmentTransaction.add(R.id.fragment_container, ssfrag, SCORESHEET_TAG);
-			Log.i("onCreate main shit", "8");
-	        fragmentTransaction.commit();
-			Log.i("onCreate main shit", "9");
-		 }
-		Log.i("onCreate main shit", "10");
-	
-	        
+        ss_frag = new ScoreSheet();
+        ss_frag.setHasOptionsMenu(true);
+        stats_frag = new Stats();
+        stats_frag.setHasOptionsMenu(true);
+        
+        fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.fragment_container, ss_frag, SCORESHEET_TAG);
+        fragmentTransaction.commit();	        
 	}
 	
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.i("main shit", "onActivityResult");
     	((ScoreSheet)fragmentManager.findFragmentByTag(SCORESHEET_TAG)).updateAfterSettings();
     }
 }

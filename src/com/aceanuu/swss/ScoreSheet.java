@@ -60,7 +60,6 @@ import com.aceanuu.swss.logic.Game;
 import com.aceanuu.swss.logic.STAGE;
 import com.aceanuu.swss.logic.WONDER;
 import com.aceanuu.swss.sqlite.DatabaseManager;
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -189,7 +188,7 @@ public class ScoreSheet extends SherlockFragment {
         wonder_list   = WONDER.values();
         
         buildStages();
-        dbm = new DatabaseManager(getActivity().getApplicationContext());
+        dbm = new DatabaseManager(getActivity());
         
         //STUFF FOR EXPANDED SCIENCE
 //        if(expanded_science)
@@ -204,7 +203,6 @@ public class ScoreSheet extends SherlockFragment {
             stage_medals.put(current_game.scoring_stages.get(i), medal_images.getDrawable(i));
     }
     
-
     private void buildTabColors() {
 
         ArrayList<FrameLayout> tabs = tabInd.getTabsArray();
@@ -215,7 +213,7 @@ public class ScoreSheet extends SherlockFragment {
             STAGE stage   = stages.get(i);
             int color     = colors.get(stage);
             t.setBackgroundColor(color);
-            Log.e("buildTabColors", "changed expansion packs iteration  " + i) ;
+            Log.e("buildTabColors", "changed expansion packs iteration  " + i + " " + STAGE.toString(stage)) ;
         }
     }
     
@@ -433,7 +431,7 @@ public class ScoreSheet extends SherlockFragment {
                 addPlayerPrompt();
                 return true;
             case R.id.ab_settings_item:
-//                startActivityForResult(new Intent(getActivity().getApplicationContext(), Settings.class), 0); 
+                startActivityForResult(new Intent(getActivity().getApplicationContext(), Settings.class), 0); 
                 return true;
         }
         return false;
@@ -441,7 +439,8 @@ public class ScoreSheet extends SherlockFragment {
     
 
     public void updateAfterSettings(){ 
-    	
+
+		Log.i("scoresheet", "updateAfterSettings");
         boolean previous_science = current_game.expanded_science;
         boolean previous_leader  = current_game.leaders_enabled;
         boolean previous_cities  = current_game.cities_enabled;
@@ -500,7 +499,7 @@ public class ScoreSheet extends SherlockFragment {
 
 
     private void showResetScores() {  
-        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
+        Dialog temp = new AlertDialog.Builder(getActivity())
         .setTitle("Score a new game?")
         .setIcon(this.getResources().getDrawable(R.drawable.navigation_refresh))
         .setPositiveButton("New Game",
@@ -525,7 +524,7 @@ public class ScoreSheet extends SherlockFragment {
     }
 
     private void showSaveScore() {
-        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
+        Dialog temp = new AlertDialog.Builder(getActivity())
         .setTitle("Save Scores?")
         .setIcon(this.getResources().getDrawable(R.drawable.result_save))
         .setPositiveButton("Save",
@@ -575,7 +574,7 @@ public class ScoreSheet extends SherlockFragment {
      * Prompts the user to either save or continue without save
      */
     private void resultsNotSavedPrompt() {
-        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
+        Dialog temp = new AlertDialog.Builder(getActivity())
         .setTitle("Results not Saved")
         .setIcon(this.getResources().getDrawable(R.drawable.alert_stop))
         .setMessage("Results for this game have not been saved.")
@@ -676,7 +675,7 @@ public class ScoreSheet extends SherlockFragment {
      * Displays the necessary prompt to capture data necessary for a new player to be made
      */
     private void addPlayerPrompt() {
-        final AlertDialog.Builder alert      = new AlertDialog.Builder(getActivity().getApplicationContext());
+        final AlertDialog.Builder alert      = new AlertDialog.Builder(getActivity());
         final View playerPromptView          = factory.inflate(R.layout.player_dialog, null);
         final Spinner spinnerWonder          = (Spinner) playerPromptView.findViewById(R.id.wonder_spinner);
         final AutoCompleteTextView inputName = (AutoCompleteTextView) playerPromptView.findViewById(R.id.player_name);
@@ -686,7 +685,7 @@ public class ScoreSheet extends SherlockFragment {
             player_names = dbm.getPlayerNames(); 
 //        }
         
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(),android.R.layout.simple_dropdown_item_1line, player_names);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(),R.layout.autocomplete, player_names);
         
         inputName.setAdapter(adapter);
         
@@ -769,7 +768,7 @@ public class ScoreSheet extends SherlockFragment {
     private void promptForOverride(final String name, final WONDER wonder, final  int pid, final  boolean expanded_science) { 
         final DatabaseManager dbm_final = dbm;
         
-        Dialog temp = new AlertDialog.Builder(getActivity().getApplicationContext())
+        Dialog temp = new AlertDialog.Builder(getActivity())
         .setTitle("Name Conflict")
         .setMessage("There is a previously deteleted player named " + name + ".")
         .setPositiveButton("Resume Existing",

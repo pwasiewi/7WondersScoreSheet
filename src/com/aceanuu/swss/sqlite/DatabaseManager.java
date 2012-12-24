@@ -13,8 +13,8 @@ import android.util.Log;
 import com.aceanuu.swss.logic.Game;
 import com.aceanuu.swss.logic.Player;
 import com.aceanuu.swss.logic.STAGE;
-import com.aceanuu.swss.stats.ResultStat;
 import com.aceanuu.swss.stats.PlayerStat;
+import com.aceanuu.swss.stats.ResultStat;
 
 //copy database 
 //adb shell
