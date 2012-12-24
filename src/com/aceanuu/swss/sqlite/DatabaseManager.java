@@ -595,9 +595,51 @@ public class DatabaseManager extends SQLiteOpenHelper  {
     
     
     
+     public PlayerStat getMostWinPlayer()
+	    {
+	        SQLiteDatabase db                 = this.getReadableDatabase(); 
+	        ArrayList<PlayerStat> player_list = new ArrayList<PlayerStat>();
+	        PlayerStat st = null;
+	        
+	        String query  = "SELECT P.NAME, P.PID, count(R.POSITION) FROM PLAYER P, RESULT R WHERE P.PID = R.PID AND R.POSITION = 1  GROUP BY R.PID   ORDER BY count(R.POSITION) DESC LIMIT 1";
+	        Cursor cursor = db.rawQuery(query, null);
+	        if (cursor.moveToFirst()){
+        		Log.i("shitshitshit", "shitshit = " + cursor.getColumnName(0) + " " + cursor.getString(0));
+        		Log.i("shitshitshit", "shitshit = " + cursor.getColumnName(1) + " " + cursor.getInt(1));
+        		Log.i("shitshitshit", "shitshit = " + cursor.getColumnName(2) + " " + cursor.getInt(2));
+	                String name =  cursor.getString(0);
+	    	                int pid =      cursor.getInt(1);;
+	                int count =    cursor.getInt(2);
+	                st = new PlayerStat(name, pid);
+	            	st.misc_stat = count + ""; 
+	        }
+	        return st;
+	    }
+    		    
     
-    
-    
+    public ArrayList<PlayerStat> getPlayerStatList()
+    {
+        SQLiteDatabase db                 = this.getReadableDatabase(); 
+        ArrayList<PlayerStat> player_list = new ArrayList<PlayerStat>();
+
+        String query  = "SELECT P." + PNAME + ", P." + PID + ", R." + RTIME + " FROM " + TABLE_PLAYER + " P, "
+        		        + TABLE_RESULT + " R WHERE P." + PID + " = R." + PID + " AND "
+        		        + "R." + RTIME + " = (SELECT MAX(" + RTIME + ") FROM " + TABLE_RESULT + " WHERE " +
+        		        		PID + " = P." + PID + ")";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()){
+            do
+            {    
+                int pid =      cursor.getInt(cursor.getColumnIndex(PID));
+                String name =  cursor.getString(cursor.getColumnIndex(PNAME));
+                long time =    cursor.getLong(cursor.getColumnIndex(RTIME));
+            	PlayerStat st = new PlayerStat(name, pid);
+            	st.datelong = time;
+            	player_list.add(st);
+            } while(cursor.moveToNext());  
+        }
+        return player_list;
+    }
     
     
     
@@ -618,6 +660,8 @@ public class DatabaseManager extends SQLiteOpenHelper  {
         }
         return names;
     }
+
+
     
 
 }

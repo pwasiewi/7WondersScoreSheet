@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+    android:paddingTop="6dp" 
+    android:paddingBottom="6dp"
+    android:paddingLeft="8dp">
+    <TextView 
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Medium.Inverse"
+        android:id="@+id/title"    />
+    <TextView 
+        android:layout_below="@id/title"
+        android:layout_alignParentLeft="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Medium.Inverse"
+        android:id="@+id/subtitle"    /> 
+</RelativeLayout>

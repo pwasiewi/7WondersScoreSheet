@@ -14,6 +14,8 @@ public class PlayerStat {
     public String              name; 
     public int                 pid;
     public HashMap<Integer, ResultStat>      game_list;
+    public Long	               datelong;
+    public String              misc_stat;
     
     public PlayerStat(String _name, int _pid) {
         name                      = _name;  
@@ -21,6 +23,11 @@ public class PlayerStat {
         game_list                 = new HashMap<Integer, ResultStat>();
     }
  
+    public String toLabelString()
+    {
+    	return misc_stat + " " + name;
+    }
+    
     public void addResultRow(Cursor row)
     {
     	Log.i("addResultRow", row.toString());
