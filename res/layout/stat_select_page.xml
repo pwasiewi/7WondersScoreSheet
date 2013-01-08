@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="match_parent" 
+        android:orientation="vertical"
     android:padding="6dp" >
 
-    <TableLayout
+    <TableLayout 
         android:id="@+id/tableLayout1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" >
+        android:layout_height="wrap_content"  >
 
         <TableRow
             android:id="@+id/tableRow1"
@@ -85,7 +84,7 @@
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow4"
+            android:id="@+id/tableRow4" 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp" >
@@ -108,22 +107,18 @@
         </TableRow>
     </TableLayout>
 
-    <TextView
-        android:id="@+id/list_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tableLayout1"
-        android:layout_below="@+id/tableLayout1"
-        android:paddingTop="6dp"
-        android:text="Medium Text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+<!--     <TextView -->
+<!--         android:id="@+id/list_label" -->
+<!--         android:layout_width="wrap_content" -->
+<!--         android:layout_height="wrap_content"  -->
+<!--         android:paddingTop="6dp" -->
+<!--         android:text="Medium Text" -->
+<!--         android:textAppearance="?android:attr/textAppearanceMedium" /> -->
 
     <ListView
-        android:id="@+id/select_list"
+        android:id="@+id/select_list" 
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/list_label"
-        android:layout_centerHorizontal="true" >
+        android:layout_height="wrap_content"  >
     </ListView>
 
-</RelativeLayout>
+</LinearLayout>

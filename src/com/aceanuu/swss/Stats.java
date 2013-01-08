@@ -2,6 +2,8 @@ package com.aceanuu.swss;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import org.achartengine.GraphicalView;
@@ -10,10 +12,15 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,7 +36,7 @@ public class Stats extends SherlockFragment{
     private GraphicalView mChartView;
     boolean finished_starting = false;
 
-    RelativeLayout frag_root;
+    LinearLayout frag_root;
     TabPageIndicator tab_root;
     ViewPager      stat_pager;
 
@@ -40,13 +47,34 @@ public class Stats extends SherlockFragment{
             Bundle savedInstanceState) {
 
         dbm = new DatabaseManager(getActivity());
-    	frag_root = (RelativeLayout) inflater.inflate(R.layout.stats_ui, container);
+    	frag_root = (LinearLayout) inflater.inflate(R.layout.stats_ui, null);
     	tab_root  = (TabPageIndicator) frag_root.findViewById(R.id.stats_tabs);
     	stat_pager= (ViewPager) frag_root.findViewById(R.id.stats_pager);
     	StatSelectAdapter adapater = new StatSelectAdapter(getActivity());
-    	stat_pager.setAdapter(adapater);
-    	
+    	stat_pager.setAdapter(adapater); 
     	tab_root.setViewPager(stat_pager);
+    	
+    	stat_pager.setOffscreenPageLimit(4);
+    	
+    	ArrayList<FrameLayout> tab_bgs = tab_root.getTabsArray();
+    	
+    	ArrayList<Integer> drawable_tabs = new ArrayList<Integer>();
+    	drawable_tabs.add(R.drawable.player);
+    	drawable_tabs.add(R.drawable.game);
+    	drawable_tabs.add(R.drawable.category);
+    	drawable_tabs.add(R.drawable.wonder);
+    	
+    	for(int i = 0; i < 4; ++i)
+    	{
+        	ImageView img = new ImageView(getActivity());
+        	img.setImageDrawable(getActivity().getResources().getDrawable(drawable_tabs.get(i)));
+        	img.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        	tab_bgs.get(i).addView(img); 
+        	FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(img.getLayoutParams());
+        	layoutParams.setMargins(12, 12, 12, 12);
+        	img.setLayoutParams(layoutParams);  
+    	}
+    	
         
 //        stat_adpater     = new StatSelectAdapter();
 //        stat_pager.setAdapter(stat_adpater);
@@ -201,7 +229,7 @@ public class Stats extends SherlockFragment{
  
     public class StatSelectAdapter extends PagerAdapter{
     	
-    	final static int num_stat_pages = 1;
+    	final static int num_stat_pages = 4;
 
 		Context ctx; 
 		PlayerSelectAdapter player;
@@ -214,14 +242,14 @@ public class Stats extends SherlockFragment{
   
 
         @Override
-        public Object instantiateItem(View collection, int position) {
+        public LinearLayout instantiateItem(View collection, int position) {
 //			   player	
 //			
 //		   Most Wins	Best Win/Loss
 //		   Highest Scoring	Most Games Played
 
 			LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View player_row = inflater.inflate(R.layout.stat_select_page, null);
+			LinearLayout player_row = (LinearLayout) inflater.inflate(R.layout.stat_select_page, null);
 			TextView top_left = (TextView) player_row.findViewById(R.id.top_row_left);
 			TextView top_right = (TextView) player_row.findViewById(R.id.top_row_right);
 			TextView top_left_label = (TextView) player_row.findViewById(R.id.top_row_left_label);
@@ -232,17 +260,18 @@ public class Stats extends SherlockFragment{
 			TextView bottom_left_label = (TextView) player_row.findViewById(R.id.bottom_row_left_label);
 			TextView bottom_right_label = (TextView) player_row.findViewById(R.id.bottom_row_right_label);
 			
-			TextView list_label = (TextView) player_row.findViewById(R.id.list_label);
+//			TextView list_label = (TextView) player_row.findViewById(R.id.list_label);
 			ListView select_list  = (ListView) player_row.findViewById(R.id.select_list);
-			
-			if(position == 0)
-			{
+			Log.w("making shit shit", "well fuck not yet");
+//			if(position == 0)
+//			{
+				Log.w("making shit shit", "fuckin doin' shit!");
 				PlayerStat most_wins   = dbm.getMostWinPlayer();
 				PlayerStat high_score  = most_wins;// dbm.getHighScorePlayer();
 				PlayerStat most_played = most_wins;//dbm.getMostPlayPlayer();
 				PlayerStat best_wl     = most_wins;//dbm.getBestWL();
 				
-				list_label.setText("All Players");
+//				list_label.setText("All Players");
 				select_list.setAdapter(player);
 				
 				top_right_label.setText("Best W/L Ratio");
@@ -251,12 +280,15 @@ public class Stats extends SherlockFragment{
 				bottom_left_label.setText("Highest Score");
 				
 
-				top_right_label.setText(best_wl.toLabelString());
-				top_left_label.setText(most_wins.toLabelString());
-				bottom_right_label.setText(most_played.toLabelString());
-				bottom_left_label.setText(high_score.toLabelString());
-			}
-			return player_row;
+				top_right.setText(best_wl.toLabelString());
+				top_left.setText(most_wins.toLabelString());
+				bottom_right.setText(most_played.toLabelString());
+				bottom_left.setText(high_score.toLabelString());
+
+	            ((ViewPager) collection).addView(player_row, 0);
+				return player_row;
+//			}
+//			return player_row;
 		}
 
 		@Override
@@ -282,7 +314,15 @@ public class Stats extends SherlockFragment{
     	public PlayerSelectAdapter(Context _ctx) {
     		ctx = _ctx;
     		player_list = dbm.getPlayerStatList();
+    		Collections.sort(player_list, new PlayerDateComparator());
 		}
+    	
+    	public void updatePlayerStats()
+    	{
+    		player_list = dbm.getPlayerStatList();
+    		Collections.sort(player_list, new PlayerDateComparator());
+    		this.notifyDataSetChanged();
+    	}
 
 		@Override
 		public int getCount() {
@@ -310,11 +350,17 @@ public class Stats extends SherlockFragment{
 		    SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, ''yy  HH:mm a");
 		    
 		    player_name.setText(player_list.get(position).name);
-		    player_date.setText(format.format(date).toString());
+		    player_date.setText("Last Played: " + format.format(date).toString());
 	    	
 			return player_row;
 		}
     }
     
-    
+   public class PlayerDateComparator implements Comparator<PlayerStat>{
+	   
+	    @Override
+	    public int compare(PlayerStat lhs, PlayerStat rhs) {
+	        return (int) (rhs.datelong - lhs.datelong);
+	    }
+	}
 }

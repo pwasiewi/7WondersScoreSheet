@@ -25,7 +25,7 @@ public class PlayerStat {
  
     public String toLabelString()
     {
-    	return misc_stat + " " + name;
+    	return misc_stat + " - " + name;
     }
     
     public void addResultRow(Cursor row)
